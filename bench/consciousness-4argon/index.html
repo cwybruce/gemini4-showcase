@@ -1,0 +1,2605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CONSCIOUSNESS OS / LIVE INNER TRACE - 3D 神经重塑交互系统</title>
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg-deep: #030712;
+      --bg-panel: rgba(6, 15, 32, 0.72);
+      --cyan: #00f0ff;
+      --cyan-dim: rgba(0, 240, 255, 0.28);
+      --cyan-glow: rgba(0, 240, 255, 0.65);
+      --pink: #ff2a85;
+      --pink-dim: rgba(255, 42, 133, 0.28);
+      --pink-glow: rgba(255, 42, 133, 0.75);
+      --purple: #9d4edd;
+      --gold: #ffbe0b;
+      --text-main: #e6f4ff;
+      --text-muted: #6c8eae;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', 'Menlo', monospace;
+      --font-sans: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 背景星尘与扫描线效果 */
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(16, 42, 86, 0.45) 0%, rgba(5, 10, 24, 0.88) 58%, #02050d 100%);
+      overflow: hidden;
+    }
+
+    #app::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0px,
+        rgba(255, 255, 255, 0) 2px,
+        rgba(0, 240, 255, 0.018) 3px,
+        rgba(0, 0, 0, 0.12) 4px
+      );
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    /* Three.js 画布层 */
+    #webgl-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* 动态 SVG 引线与 HUD 圆环层 */
+    #hud-svg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* 顶部栏 + 顶部场景切换导航 */
+    .top-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(3, 9, 23, 0.92) 0%, rgba(3, 9, 23, 0.35) 85%, transparent 100%);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.22);
+      z-index: 20;
+      font-family: var(--font-mono);
+    }
+
+    .top-header::before {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 22%;
+      width: 56%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), var(--cyan), transparent);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: #d8f3ff;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+      white-space: nowrap;
+    }
+
+    .brand-title span.slash {
+      color: var(--cyan);
+      font-weight: bold;
+    }
+
+    /* 顶部场景切换导航条 */
+    .top-scene-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(5, 16, 36, 0.78);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-radius: 4px;
+      padding: 3px 6px;
+      box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.08);
+    }
+
+    .top-scene-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .top-scene-btn .num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      opacity: 0.75;
+    }
+
+    .top-scene-btn:hover {
+      color: #fff;
+      border-color: rgba(0, 240, 255, 0.4);
+      background: rgba(0, 240, 255, 0.1);
+    }
+
+    .top-scene-btn.active {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.38), rgba(0, 240, 255, 0.18));
+      border-color: var(--pink);
+      box-shadow: 0 0 10px rgba(255, 42, 133, 0.45);
+      font-weight: 600;
+    }
+
+    .top-meta-right {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      white-space: nowrap;
+    }
+
+    .subject-tag {
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      display: none;
+    }
+
+    @media (min-width: 1440px) {
+      .subject-tag {
+        display: inline-block;
+      }
+    }
+
+    .depth-indicator {
+      color: var(--pink);
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(255, 42, 133, 0.6);
+    }
+
+    .timer-indicator {
+      color: #b8d8be;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px 8px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 3px;
+      background: rgba(0, 240, 255, 0.05);
+    }
+
+    /* 通用科幻 HUD 面板样式 */
+    .hud-panel {
+      position: absolute;
+      top: 64px;
+      bottom: 66px;
+      width: 280px;
+      background: var(--bg-panel);
+      border: 1px solid rgba(0, 240, 255, 0.32);
+      border-radius: 6px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow:
+        0 0 24px rgba(0, 0, 0, 0.7),
+        inset 0 0 18px rgba(0, 240, 255, 0.06);
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 16px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .hud-panel::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* 面板四角装饰高光 */
+    .hud-panel::before,
+    .hud-panel::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+    }
+
+    .hud-panel::before {
+      top: -1px;
+      left: -1px;
+      border-top: 2px solid var(--cyan);
+      border-left: 2px solid var(--cyan);
+    }
+
+    .hud-panel::after {
+      bottom: -1px;
+      right: -1px;
+      border-bottom: 2px solid var(--cyan);
+      border-right: 2px solid var(--cyan);
+    }
+
+    .left-panel {
+      left: 16px;
+    }
+
+    .right-panel {
+      right: 16px;
+    }
+
+    .panel-section {
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.16);
+    }
+
+    .panel-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 11px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: #d6ecff;
+    }
+
+    .badge-pink {
+      color: var(--pink);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px var(--pink-glow);
+    }
+
+    /* STATE SIGNALS 进度条列表 */
+    .signal-row {
+      display: grid;
+      grid-template-columns: 88px 1fr 26px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .signal-label {
+      color: #8ab0d0;
+      letter-spacing: 0.8px;
+    }
+
+    .signal-bar-track {
+      height: 6px;
+      background: rgba(16, 36, 64, 0.85);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(0, 240, 255, 0.12);
+    }
+
+    .signal-bar-fill {
+      height: 100%;
+      border-radius: 1px;
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .signal-bar-fill.pink {
+      background: linear-gradient(90deg, #b5179e, var(--pink));
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    .signal-bar-fill.cyan {
+      background: linear-gradient(90deg, #0077b6, var(--cyan));
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .signal-val {
+      text-align: right;
+      color: #e0f2fe;
+      font-weight: 600;
+    }
+
+    /* PROFILE 区域 */
+    .profile-kv {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .profile-kv .k {
+      color: #8ab0d0;
+    }
+
+    .profile-kv .v {
+      color: #ffffff;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .profile-note {
+      font-size: 10px;
+      line-height: 1.5;
+      color: #6b8fae;
+      margin: 9px 0 11px;
+    }
+
+    .profile-brain-box {
+      display: grid;
+      grid-template-columns: 108px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .mini-head-canvas-wrap {
+      width: 108px;
+      height: 122px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 4px;
+      background: radial-gradient(circle at 50% 45%, rgba(255, 42, 133, 0.16), rgba(4, 12, 28, 0.92));
+      position: relative;
+      overflow: hidden;
+    }
+
+    #mini-head-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .network-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.6px;
+    }
+
+    .network-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #7da0c0;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .network-item:hover {
+      color: #fff;
+    }
+
+    .network-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #355270;
+      flex-shrink: 0;
+    }
+
+    .network-item.active-pink {
+      color: #ffd6e8;
+    }
+    .network-item.active-pink .network-dot {
+      background: var(--pink);
+      box-shadow: 0 0 6px var(--pink);
+    }
+
+    .network-item.active-cyan {
+      color: #ccfaff;
+    }
+    .network-item.active-cyan .network-dot {
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+    }
+
+    /* NEURAL ACTIVITY 区域 */
+    .neural-activity-grid {
+      display: grid;
+      grid-template-columns: 1fr 92px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .oscilloscope-wrap {
+      height: 82px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 4px;
+      background: rgba(3, 10, 24, 0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #oscilloscope-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .wave-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .wave-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wave-metric-row .w-name {
+      color: #7da2c4;
+    }
+
+    .wave-metric-row .w-name.sync {
+      color: var(--pink);
+    }
+
+    .wave-metric-row .w-val {
+      color: #e2f1ff;
+      font-weight: 600;
+    }
+
+    /* 右侧面板：LOOP STRENGTH */
+    .loop-block {
+      margin-bottom: 10px;
+    }
+
+    .loop-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .loop-header .l-title {
+      color: #90b4d4;
+    }
+
+    .loop-header .l-pct.pink {
+      color: var(--pink);
+      font-weight: bold;
+      text-shadow: 0 0 6px var(--pink-glow);
+    }
+
+    .loop-header .l-pct.cyan {
+      color: var(--cyan);
+      font-weight: bold;
+      text-shadow: 0 0 6px var(--cyan-glow);
+    }
+
+    /* 右侧面板：SCENE MAP */
+    .scene-map-container {
+      display: grid;
+      grid-template-columns: 105px 1fr;
+      gap: 6px;
+      align-items: center;
+      min-height: 225px;
+    }
+
+    .scene-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .scene-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 7px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #7ea1c4;
+      border-left: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .scene-item .s-idx {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #567a9e;
+    }
+
+    .scene-item:hover {
+      color: #e4f4ff;
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .scene-item.active {
+      color: #ffffff;
+      font-weight: 600;
+      border-left: 2px solid var(--pink);
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.28) 0%, rgba(255, 42, 133, 0) 100%);
+      text-shadow: 0 0 8px rgba(255, 42, 133, 0.6);
+    }
+
+    .scene-item.active .s-idx {
+      color: var(--pink);
+    }
+
+    .holo-stack-wrap {
+      width: 100%;
+      height: 225px;
+      position: relative;
+    }
+
+    #holo-stack-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: pointer;
+    }
+
+    /* 右侧面板：BRAIN SCAN . LIVE */
+    .scan-freq-tag {
+      font-size: 10px;
+      color: #5c82a6;
+    }
+
+    .brain-scans-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .scan-slice-box {
+      aspect-ratio: 1 / 1.12;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 4px;
+      background: rgba(3, 9, 22, 0.9);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scan-slice-box canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .lr-balance-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #7ea1c4;
+    }
+
+    .lr-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(12, 28, 52, 0.9);
+      border-radius: 2px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .lr-Segment-cyan {
+      width: 38%;
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.25), var(--cyan));
+    }
+
+    .lr-Segment-pink {
+      width: 48%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), #ffd6ea);
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    /* 中央舞台左上角问题区 */
+    .center-top-question {
+      position: absolute;
+      top: 72px;
+      left: 325px;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .rewiring-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--cyan);
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.45);
+    }
+
+    .question-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #63b4d8;
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
+    }
+
+    .question-main {
+      font-size: 29px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      text-shadow: 0 0 18px rgba(0, 240, 255, 0.45);
+    }
+
+    /* 6个 3D 脑区悬浮标注卡片 */
+    .callout-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 14;
+    }
+
+    .brain-callout {
+      position: absolute;
+      width: 136px;
+      padding: 8px 10px;
+      background: rgba(6, 18, 38, 0.78);
+      border: 1px solid rgba(0, 240, 255, 0.55);
+      border-radius: 6px;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.16), inset 0 0 10px rgba(0, 240, 255, 0.08);
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .brain-callout:hover,
+    .brain-callout.active {
+      transform: translateY(-2px) scale(1.03);
+      border-color: var(--pink);
+      box-shadow: 0 0 20px rgba(255, 42, 133, 0.4), inset 0 0 12px rgba(255, 42, 133, 0.16);
+    }
+
+    .brain-callout.pink-theme {
+      border-color: rgba(199, 68, 255, 0.65);
+    }
+
+    .callout-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #eaf7ff;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .callout-desc {
+      font-size: 11px;
+      color: #79a6c8;
+      margin-bottom: 6px;
+    }
+
+    .callout-wave {
+      width: 100%;
+      height: 20px;
+      display: block;
+    }
+
+    /* 脸部右侧缩写垂直列表 */
+    .region-abbr-column {
+      position: absolute;
+      right: 318px;
+      top: 46%;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: rgba(120, 175, 215, 0.55);
+      letter-spacing: 1px;
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* 中央底部阶段标题与旁白区 */
+    .center-bottom-narrative {
+      position: absolute;
+      left: 310px;
+      right: 310px;
+      bottom: 74px;
+      text-align: center;
+      z-index: 14;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phase-tag {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--pink);
+      text-shadow: 0 0 8px var(--pink-glow);
+      margin-bottom: 4px;
+    }
+
+    .phase-main-title {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #ffffff;
+      text-shadow:
+        0 0 16px rgba(255, 255, 255, 0.45),
+        0 0 32px rgba(0, 240, 255, 0.35);
+      margin-bottom: 10px;
+    }
+
+    .phase-quote {
+      max-width: 580px;
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: #c8e2f8;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+      margin-bottom: 14px;
+    }
+
+    .voice-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 660px;
+      padding: 6px 16px;
+      background: linear-gradient(90deg, transparent 0%, rgba(5, 18, 38, 0.82) 20%, rgba(5, 18, 38, 0.82) 80%, transparent 100%);
+      border-top: 1px solid rgba(0, 240, 255, 0.22);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.22);
+    }
+
+    .voice-ecg {
+      width: 56px;
+      height: 18px;
+      stroke: var(--cyan);
+      stroke-width: 1.5;
+      fill: none;
+      opacity: 0.75;
+    }
+
+    .voice-label {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+
+    .voice-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.8px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    /* 底部状态日志栏 */
+    .bottom-footer {
+      position: absolute;
+      bottom: 8px;
+      left: 16px;
+      right: 16px;
+      height: 50px;
+      background: rgba(5, 13, 28, 0.86);
+      border: 1px solid rgba(0, 240, 255, 0.28);
+      border-radius: 5px;
+      display: grid;
+      grid-template-columns: 265px 175px 1fr 220px 110px;
+      align-items: center;
+      padding: 0 16px;
+      font-family: var(--font-mono);
+      z-index: 20;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.65);
+    }
+
+    .footer-log-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-right: 1px solid rgba(0, 240, 255, 0.16);
+      padding-right: 12px;
+    }
+
+    .log-title {
+      font-size: 11px;
+      color: var(--cyan);
+      letter-spacing: 1px;
+    }
+
+    .log-sub {
+      font-size: 9.5px;
+      color: #6b8fae;
+    }
+
+    .footer-status-col {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 16px;
+      font-size: 12px;
+      color: #d6ecff;
+    }
+
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      animation: pulseGlow 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.65; }
+    }
+
+    .footer-label-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      height: 100%;
+    }
+
+    .footer-label-text {
+      font-size: 11.5px;
+      color: #aecce8;
+      letter-spacing: 0.8px;
+    }
+
+    .footer-spectrum-line {
+      position: absolute;
+      bottom: 4px;
+      width: 75%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), var(--cyan), transparent);
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    .footer-choice-col {
+      font-size: 11.5px;
+      color: #9ab8d6;
+      text-align: center;
+      border-left: 1px solid rgba(0, 240, 255, 0.16);
+      border-right: 1px solid rgba(0, 240, 255, 0.16);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-stages-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-left: 14px;
+      font-size: 8.5px;
+      letter-spacing: 1px;
+      color: #7498b8;
+    }
+
+    .f-stage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .f-stage-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 4px var(--cyan);
+    }
+
+    /* 移动端抽屉控制按钮（仅窄屏显示） */
+    .mobile-drawer-bar {
+      display: none;
+      position: absolute;
+      bottom: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 25;
+      gap: 8px;
+      background: rgba(4, 14, 30, 0.9);
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 240, 255, 0.35);
+    }
+
+    .mobile-tab-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: #b8dcff;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .mobile-tab-btn.active {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: #fff;
+    }
+
+    /* 响应式适配：平板与移动端 */
+    @media (max-width: 1180px) {
+      .center-top-question {
+        left: 20px;
+        top: 62px;
+      }
+      .question-main {
+        font-size: 22px;
+      }
+      .center-bottom-narrative {
+        left: 20px;
+        right: 20px;
+        bottom: 106px;
+      }
+      .phase-main-title {
+        font-size: 28px;
+      }
+      .phase-quote {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+      .voice-text {
+        font-size: 13px;
+      }
+      .region-abbr-column {
+        display: none;
+      }
+      .hud-panel {
+        width: 270px;
+        top: 58px;
+        bottom: 105px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+      }
+      .left-panel.mobile-hidden {
+        transform: translateX(-110%);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .right-panel.mobile-hidden {
+        transform: translateX(110%);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .mobile-drawer-bar {
+        display: flex;
+      }
+      .top-header {
+        overflow-x: auto;
+        gap: 12px;
+      }
+      .bottom-footer {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+        padding: 6px 12px;
+        gap: 4px;
+      }
+      .footer-choice-col,
+      .footer-stages-col,
+      .footer-label-col {
+        display: none;
+      }
+      .brain-callout {
+        width: 112px;
+        padding: 5px 7px;
+      }
+      .callout-title {
+        font-size: 12px;
+      }
+      .callout-desc {
+        font-size: 9.5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Three.js 3D 舞台 -->
+    <div id="webgl-container"></div>
+
+    <!-- 动态 HUD 圆环与 3D 脑区引线 SVG 层 -->
+    <svg id="hud-svg-layer" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <!-- 顶部状态与场景切换导航栏 -->
+    <header class="top-header">
+      <div class="brand-title">
+        <span>CONSCIOUSNESS OS</span>
+        <span class="slash">/</span>
+        <span>LIVE INNER TRACE</span>
+      </div>
+
+      <!-- 顶部场景切换导航 (01 - 07) -->
+      <nav class="top-scene-nav" id="top-scene-nav" aria-label="场景切换导航">
+        <!-- 由 JS 动态渲染并与右侧 SCENE MAP 同步 -->
+      </nav>
+
+      <div class="top-meta-right">
+        <span class="subject-tag">SUBJECT H-01 | REAL-TIME NEURAL MAPPING</span>
+        <span class="depth-indicator" id="depth-readout">DEPTH 298 / 0.42x</span>
+        <span class="timer-indicator" id="timer-readout" title="点击暂停/继续神经追踪">22.5s / 36s</span>
+      </div>
+    </header>
+
+    <!-- 左侧 HUD 面板 -->
+    <aside class="hud-panel left-panel mobile-hidden" id="left-panel">
+      <!-- STATE SIGNALS -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>STATE SIGNALS</span>
+          <span class="badge-pink">示意</span>
+        </div>
+        <div id="signals-container">
+          <!-- 动态信号条 -->
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>PROFILE</span>
+        </div>
+        <div class="profile-kv">
+          <span class="k">CURRENT</span>
+          <span class="v" id="profile-current">RATIONAL</span>
+        </div>
+        <div class="profile-kv">
+          <span class="k">FALLBACK</span>
+          <span class="v" id="profile-fallback">EGO</span>
+        </div>
+        <p class="profile-note">
+          这些状态为动态值，个人差异来源自过往经验，不代表最终结论。
+        </p>
+        <div class="profile-brain-box">
+          <div class="mini-head-canvas-wrap">
+            <canvas id="mini-head-canvas" width="108" height="122"></canvas>
+          </div>
+          <ul class="network-list" id="network-list">
+            <li class="network-item active-pink" data-region="pfc"><span class="network-dot"></span>DEFAULT MODE</li>
+            <li class="network-item active-cyan" data-region="ins"><span class="network-dot"></span>SALIENCE</li>
+            <li class="network-item active-cyan" data-region="pfc"><span class="network-dot"></span>EXECUTIVE</li>
+            <li class="network-item" data-region="str"><span class="network-dot"></span>REWARD</li>
+            <li class="network-item" data-region="amyg"><span class="network-dot"></span>AMYGDALA</li>
+            <li class="network-item" data-region="hpc"><span class="network-dot"></span>HIPPOCAMPUS</li>
+            <li class="network-item" data-region="str"><span class="network-dot"></span>STRIATUM</li>
+            <li class="network-item" data-region="par"><span class="network-dot"></span>THALAMUS</li>
+            <li class="network-item" data-region="str"><span class="network-dot"></span>CEREBELLUM</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- NEURAL ACTIVITY -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>NEURAL ACTIVITY</span>
+        </div>
+        <div class="neural-activity-grid">
+          <div class="oscilloscope-wrap">
+            <canvas id="oscilloscope-canvas" width="150" height="82"></canvas>
+          </div>
+          <div class="wave-metrics">
+            <div class="wave-metric-row"><span class="w-name">- ALPHA</span><span class="w-val" id="val-alpha">0.42</span></div>
+            <div class="wave-metric-row"><span class="w-name">- BETA</span><span class="w-val" id="val-beta">0.78</span></div>
+            <div class="wave-metric-row"><span class="w-name">- THETA</span><span class="w-val" id="val-theta">0.31</span></div>
+            <div class="wave-metric-row"><span class="w-name">- GAMMA</span><span class="w-val" id="val-gamma">0.56</span></div>
+            <div class="wave-metric-row"><span class="w-name sync">- SYNC</span><span class="w-val" id="val-sync">0.63</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 中央左上人生问题标题 -->
+    <div class="center-top-question">
+      <div class="rewiring-tag" id="rewiring-tag">REWIRING / 正在重塑神经路径</div>
+      <div class="question-sub">QUESTION / 人生问题</div>
+      <h1 class="question-main" id="question-main">为什么我总坚持不了？</h1>
+    </div>
+
+    <!-- 6个脑区悬浮 HUD 标注框 -->
+    <div class="callout-layer" id="callout-layer">
+      <!-- 1. 前额叶皮层 -->
+      <div class="brain-callout" id="callout-pfc" data-region="pfc" style="left: 27%; top: 20%;">
+        <div class="callout-title">前额叶皮层</div>
+        <div class="callout-desc">决策与自我控制</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+      <!-- 2. 杏仁核 -->
+      <div class="brain-callout pink-theme" id="callout-amyg" data-region="amyg" style="left: 25%; top: 37%;">
+        <div class="callout-title">杏仁核</div>
+        <div class="callout-desc">情绪与威胁检测</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+      <!-- 3. 纹状体 -->
+      <div class="brain-callout" id="callout-str" data-region="str" style="left: 29%; top: 53.5%;">
+        <div class="callout-title">纹状体</div>
+        <div class="callout-desc">奖赏与习惯回路</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+      <!-- 4. 顶叶皮层 -->
+      <div class="brain-callout" id="callout-par" data-region="par" style="right: 24.5%; top: 12.5%;">
+        <div class="callout-title">顶叶皮层</div>
+        <div class="callout-desc">注意与身体映射</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+      <!-- 5. 海马体 -->
+      <div class="brain-callout" id="callout-hpc" data-region="hpc" style="right: 23%; top: 32.5%;">
+        <div class="callout-title">海马体</div>
+        <div class="callout-desc">记忆与情境整合</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+      <!-- 6. 岛叶皮层 -->
+      <div class="brain-callout" id="callout-ins" data-region="ins" style="right: 31.5%; top: 52.5%;">
+        <div class="callout-title">岛叶皮层</div>
+        <div class="callout-desc">内感受与动机</div>
+        <canvas class="callout-wave" width="114" height="20"></canvas>
+      </div>
+    </div>
+
+    <!-- 右下侧脸旁脑区缩写阵列 -->
+    <div class="region-abbr-column">
+      <span>PFC</span>
+      <span>AMYG</span>
+      <span>HPC</span>
+      <span>STR</span>
+      <span>THA</span>
+      <span>INS</span>
+      <span>DMN</span>
+      <span>SN</span>
+      <span>CB</span>
+    </div>
+
+    <!-- 中央底部阶段标题与旁白 -->
+    <div class="center-bottom-narrative">
+      <div class="phase-tag" id="phase-tag">PHASE 05 / 07</div>
+      <h2 class="phase-main-title" id="phase-title">观察者上线</h2>
+      <p class="phase-quote" id="phase-quote">
+        “改变从这一秒开始。你第一次看见‘想放弃’只是一个信号。<br />
+        只要把‘想逃避’当作大脑正在行动，也可能拒绝身体和关系信息。”
+      </p>
+      <div class="voice-bar">
+        <svg class="voice-ecg" viewBox="0 0 60 20">
+          <polyline points="0,10 15,10 19,3 23,17 27,6 31,13 35,10 60,10" />
+        </svg>
+        <span class="voice-label">VOICE / 旁白</span>
+        <span class="voice-text" id="voice-text">改变始于觉察：想放弃只是信号，不是命令。</span>
+        <svg class="voice-ecg" viewBox="0 0 60 20">
+          <polyline points="0,10 25,10 29,4 33,16 37,7 41,12 45,10 60,10" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- 右侧 HUD 面板 -->
+    <aside class="hud-panel right-panel mobile-hidden" id="right-panel">
+      <!-- LOOP STRENGTH -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>LOOP STRENGTH</span>
+        </div>
+        <div class="loop-block">
+          <div class="loop-header">
+            <span class="l-title">OLD LOOP</span>
+            <span class="l-pct pink" id="old-loop-pct">98%</span>
+          </div>
+          <div class="signal-bar-track">
+            <div class="signal-bar-fill pink" id="old-loop-bar" style="width: 98%;"></div>
+          </div>
+        </div>
+        <div class="loop-block" style="margin-bottom: 2px;">
+          <div class="loop-header">
+            <span class="l-title">NEW LOOP</span>
+            <span class="l-pct cyan" id="new-loop-pct">6%</span>
+          </div>
+          <div class="signal-bar-track">
+            <div class="signal-bar-fill cyan" id="new-loop-bar" style="width: 6%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE MAP -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>SCENE MAP</span>
+        </div>
+        <div class="scene-map-container">
+          <div class="scene-list" id="scene-map-list">
+            <!-- JS 渲染 01 - 07 -->
+          </div>
+          <div class="holo-stack-wrap">
+            <canvas id="holo-stack-canvas" width="135" height="225"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRAIN SCAN . LIVE -->
+      <div class="panel-section">
+        <div class="section-header">
+          <span>BRAIN SCAN . LIVE</span>
+          <span class="scan-freq-tag">FREQ 0.5 - 40 HZ</span>
+        </div>
+        <div class="brain-scans-row">
+          <div class="scan-slice-box"><canvas id="scan-canvas-0" width="76" height="86"></canvas></div>
+          <div class="scan-slice-box"><canvas id="scan-canvas-1" width="76" height="86"></canvas></div>
+          <div class="scan-slice-box"><canvas id="scan-canvas-2" width="76" height="86"></canvas></div>
+        </div>
+        <div class="lr-balance-row">
+          <span>L</span>
+          <div class="lr-track">
+            <div class="lr-Segment-cyan" id="lr-cyan"></div>
+            <div class="lr-Segment-pink" id="lr-pink"></div>
+          </div>
+          <span>R</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 移动端面板切换浮条 -->
+    <div class="mobile-drawer-bar">
+      <button class="mobile-tab-btn active" data-panel="none">3D 视图</button>
+      <button class="mobile-tab-btn" data-panel="left">左：状态信号</button>
+      <button class="mobile-tab-btn" data-panel="right">右：回路切面</button>
+    </div>
+
+    <!-- 底部日志状态栏 -->
+    <footer class="bottom-footer">
+      <div class="footer-log-col">
+        <div class="log-title">&gt; INNER_TRACE.log</div>
+        <div class="log-sub">OBSERVER v1.2.4</div>
+        <div class="log-sub">SESSION #7843.26.11 &nbsp;2025-05-17</div>
+      </div>
+      <div class="footer-status-col">
+        <span class="online-dot"></span>
+        <span id="footer-observer-status">OBSERVER online</span>
+      </div>
+      <div class="footer-label-col">
+        <div class="footer-label-text" id="footer-label-text">LABEL: “这是冲动，不是命令”</div>
+        <div class="footer-spectrum-line"></div>
+      </div>
+      <div class="footer-choice-col" id="footer-choice-text">
+        CHOICE_SPACE expanding...
+      </div>
+      <div class="footer-stages-col">
+        <div class="f-stage-row"><span>PERCEIVE</span><span class="f-stage-dot"></span></div>
+        <div class="f-stage-row"><span>UNDERSTAND</span><span class="f-stage-dot"></span></div>
+        <div class="f-stage-row"><span>REWIRE</span><span class="f-stage-dot"></span></div>
+        <div class="f-stage-row"><span>BECOME</span><span class="f-stage-dot"></span></div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. 01–07 七大神经重塑场景完整数据（默认激活 05 观察者，1:1 对应原图）
+     ********************************************************************/
+    const SCENES_DATA = [
+      {
+        id: 1,
+        code: '01',
+        name: '意念触发',
+        phaseTitle: '意念触发',
+        depth: 'DEPTH 112 / 0.18x',
+        signals: [
+          { key: 'THREAT', val: 38, color: 'pink' },
+          { key: 'FRICTION', val: 64, color: 'pink' },
+          { key: 'REWARD BIAS', val: 52, color: 'pink' },
+          { key: 'OBSERVER', val: 8, color: 'cyan' },
+          { key: 'AGENCY', val: 12, color: 'cyan' }
+        ],
+        current: 'HABITUAL',
+        fallback: 'AVOIDANCE',
+        waves: { alpha: '0.35', beta: '0.68', theta: '0.29', gamma: '0.41', sync: '0.32' },
+        oldLoop: 99,
+        newLoop: 1,
+        quote: '“当面对枯燥或高难度任务时，大脑首先捕捉到模糊的不适感。<br/>在意识尚未察觉前，底层神经脉冲已经开始检索过往逃避记忆。”',
+        voice: '触发瞬间：大脑将未知阻力识别为潜在消耗。',
+        label: 'LABEL: “阻力信号已生成”',
+        choice: 'CHOICE_SPACE locked',
+        focusRegion: 'ins',
+        camPos: { x: -0.4, y: 0.2, z: 6.4 }
+      },
+      {
+        id: 2,
+        code: '02',
+        name: '自动情绪',
+        phaseTitle: '自动情绪唤醒',
+        depth: 'DEPTH 186 / 0.25x',
+        signals: [
+          { key: 'THREAT', val: 84, color: 'pink' },
+          { key: 'FRICTION', val: 89, color: 'pink' },
+          { key: 'REWARD BIAS', val: 65, color: 'pink' },
+          { key: 'OBSERVER', val: 5, color: 'cyan' },
+          { key: 'AGENCY', val: 9, color: 'cyan' }
+        ],
+        current: 'REACTIVE',
+        fallback: 'DEFENSE',
+        waves: { alpha: '0.22', beta: '0.91', theta: '0.24', gamma: '0.48', sync: '0.28' },
+        oldLoop: 99,
+        newLoop: 2,
+        quote: '“杏仁核在 200 毫秒内拉响威胁警报，焦虑与烦躁迅速接管身体。<br/>前额叶控制力暂时下线，系统进入本能防御模式。”',
+        voice: '情绪劫持：杏仁核将任务压力放大为生存威胁。',
+        label: 'LABEL: “杏仁核高频放电中”',
+        choice: 'CHOICE_SPACE narrowing...',
+        focusRegion: 'amyg',
+        camPos: { x: -0.9, y: -0.1, z: 6.1 }
+      },
+      {
+        id: 3,
+        code: '03',
+        name: '即时奖励',
+        phaseTitle: '渴求即时奖励',
+        depth: 'DEPTH 234 / 0.31x',
+        signals: [
+          { key: 'THREAT', val: 72, color: 'pink' },
+          { key: 'FRICTION', val: 86, color: 'pink' },
+          { key: 'REWARD BIAS', val: 94, color: 'pink' },
+          { key: 'OBSERVER', val: 7, color: 'cyan' },
+          { key: 'AGENCY', val: 11, color: 'cyan' }
+        ],
+        current: 'CRAVING',
+        fallback: 'DOPAMINE',
+        waves: { alpha: '0.28', beta: '0.84', theta: '0.36', gamma: '0.52', sync: '0.39' },
+        oldLoop: 98,
+        newLoop: 3,
+        quote: '“纹状体激活旧习惯回路，迫切需要短视频、零食或分心来缓解不适。<br/>大脑并不是懒惰，而是在用最低成本追求多巴胺补偿。”',
+        voice: '奖赏偏移：纹状体正在推动你滑向短期快感。',
+        label: 'LABEL: “正在搜寻多巴胺补偿”',
+        choice: 'CHOICE_SPACE hijacked',
+        focusRegion: 'str',
+        camPos: { x: -0.6, y: -0.35, z: 6.0 }
+      },
+      {
+        id: 4,
+        code: '04',
+        name: '归因器',
+        phaseTitle: '自我归因叙事',
+        depth: 'DEPTH 265 / 0.36x',
+        signals: [
+          { key: 'THREAT', val: 68, color: 'pink' },
+          { key: 'FRICTION', val: 85, color: 'pink' },
+          { key: 'REWARD BIAS', val: 80, color: 'pink' },
+          { key: 'OBSERVER', val: 11, color: 'cyan' },
+          { key: 'AGENCY', val: 14, color: 'cyan' }
+        ],
+        current: 'NARRATIVE',
+        fallback: 'EGO',
+        waves: { alpha: '0.33', beta: '0.82', theta: '0.38', gamma: '0.49', sync: '0.47' },
+        oldLoop: 98,
+        newLoop: 4,
+        quote: '“海马体调取过往失败记忆，默认模式网络开始编织合理化借口：<br/>‘我天生没有毅力’、‘今天状态不好，明天再重新开始吧’。”',
+        voice: '内部叙事：把生理阻力错误翻译成“我不行”。',
+        label: 'LABEL: “自动合理化借口生成”',
+        choice: 'CHOICE_SPACE standby',
+        focusRegion: 'hpc',
+        camPos: { x: 0.7, y: 0.15, z: 6.2 }
+      },
+      {
+        // 原图 1:1 默认阶段
+        id: 5,
+        code: '05',
+        name: '观察者',
+        phaseTitle: '观察者上线',
+        depth: 'DEPTH 298 / 0.42x',
+        signals: [
+          { key: 'THREAT', val: 56, color: 'pink' },
+          { key: 'FRICTION', val: 82, color: 'pink' },
+          { key: 'REWARD BIAS', val: 74, color: 'pink' },
+          { key: 'OBSERVER', val: 16, color: 'cyan' },
+          { key: 'AGENCY', val: 21, color: 'cyan' }
+        ],
+        current: 'RATIONAL',
+        fallback: 'EGO',
+        waves: { alpha: '0.42', beta: '0.78', theta: '0.31', gamma: '0.56', sync: '0.63' },
+        oldLoop: 98,
+        newLoop: 6,
+        quote: '“改变从这一秒开始。你第一次看见‘想放弃’只是一个信号。<br/>只要把‘想逃避’当作大脑正在行动，也可能拒绝身体和关系信息。”',
+        voice: '改变始于觉察：想放弃只是信号，不是命令。',
+        label: 'LABEL: “这是冲动，不是命令”',
+        choice: 'CHOICE_SPACE expanding...',
+        focusRegion: 'pfc',
+        camPos: { x: 0.0, y: 0.0, z: 6.3 }
+      },
+      {
+        id: 6,
+        code: '06',
+        name: '最小干预',
+        phaseTitle: '最小动作干预',
+        depth: 'DEPTH 342 / 0.68x',
+        signals: [
+          { key: 'THREAT', val: 34, color: 'pink' },
+          { key: 'FRICTION', val: 48, color: 'pink' },
+          { key: 'REWARD BIAS', val: 45, color: 'pink' },
+          { key: 'OBSERVER', val: 62, color: 'cyan' },
+          { key: 'AGENCY', val: 68, color: 'cyan' }
+        ],
+        current: 'EXECUTIVE',
+        fallback: 'OBSERVER',
+        waves: { alpha: '0.58', beta: '0.64', theta: '0.44', gamma: '0.72', sync: '0.79' },
+        oldLoop: 76,
+        newLoop: 28,
+        quote: '“前额叶与顶叶皮层协同接管注意，绕过宏大目标带来的恐惧。<br/>只执行未来 2 分钟最小可见动作，摩擦阻力瞬间下降。”',
+        voice: '微量干预：用无痛的极小行动绕过杏仁核警报。',
+        label: 'LABEL: “执行最小可行动作”',
+        choice: 'CHOICE_SPACE active [68%]',
+        focusRegion: 'par',
+        camPos: { x: 0.5, y: 0.4, z: 5.9 }
+      },
+      {
+        id: 7,
+        code: '07',
+        name: '新回路',
+        phaseTitle: '新神经回路成形',
+        depth: 'DEPTH 410 / 1.00x',
+        signals: [
+          { key: 'THREAT', val: 18, color: 'pink' },
+          { key: 'FRICTION', val: 24, color: 'pink' },
+          { key: 'REWARD BIAS', val: 29, color: 'pink' },
+          { key: 'OBSERVER', val: 88, color: 'cyan' },
+          { key: 'AGENCY', val: 92, color: 'cyan' }
+        ],
+        current: 'INTEGRATED',
+        fallback: 'RATIONAL',
+        waves: { alpha: '0.76', beta: '0.52', theta: '0.61', gamma: '0.88', sync: '0.94' },
+        oldLoop: 42,
+        newLoop: 58,
+        quote: '“每一次在冲动前停顿并选择微小行动，都在为新突触包裹髓鞘。<br/>坚持不再依赖痛苦的意志力消耗，而是成为新的自动化神经通路。”',
+        voice: '重塑完成：新的神经髓鞘正在巩固你的自主选择。',
+        label: 'LABEL: “新突触连接已强化”',
+        choice: 'CHOICE_SPACE stabilized',
+        focusRegion: 'pfc',
+        camPos: { x: -0.2, y: 0.1, z: 6.1 }
+      }
+    ];
+
+    let activeSceneIndex = 4; // 默认对应 05 观察者 (index = 4)
+    let selectedRegionKey = 'pfc';
+    let isTimerPaused = false;
+    let traceSeconds = 22.5;
+
+    /********************************************************************
+     * 2. UI 渲染与场景切换逻辑
+     ********************************************************************/
+    const topNavEl = document.getElementById('top-scene-nav');
+    const sceneMapListEl = document.getElementById('scene-map-list');
+    const signalsContainerEl = document.getElementById('signals-container');
+
+    function initNavigationUI() {
+      topNavEl.innerHTML = '';
+      sceneMapListEl.innerHTML = '';
+
+      SCENES_DATA.forEach((scene, idx) => {
+        // 顶部场景切换按钮
+        const btn = document.createElement('button');
+        btn.className = 'top-scene-btn' + (idx === activeSceneIndex ? ' active' : '');
+        btn.innerHTML = `<span class="num">${scene.code}</span><span>${scene.name}</span>`;
+        btn.addEventListener('click', () => switchScene(idx));
+        topNavEl.appendChild(btn);
+
+        // 右侧 SCENE MAP 列表项
+        const item = document.createElement('div');
+        item.className = 'scene-item' + (idx === activeSceneIndex ? ' active' : '');
+        item.innerHTML = `<span class="s-idx">${scene.code}</span><span>${scene.name}</span>`;
+        item.addEventListener('click', () => switchScene(idx));
+        sceneMapListEl.appendChild(item);
+      });
+    }
+
+    function renderSignals(signals) {
+      signalsContainerEl.innerHTML = signals.map(s => `
+        <div class="signal-row">
+          <span class="signal-label">${s.key}</span>
+          <div class="signal-bar-track">
+            <div class="signal-bar-fill ${s.color}" style="width: ${s.val}%;"></div>
+          </div>
+          <span class="signal-val">${s.val}</span>
+        </div>
+      `).join('');
+    }
+
+    function switchScene(idx) {
+      activeSceneIndex = idx;
+      const data = SCENES_DATA[idx];
+      selectedRegionKey = data.focusRegion;
+
+      // 更新顶部导航与右侧列表高亮
+      document.querySelectorAll('.top-scene-btn').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      document.querySelectorAll('.scene-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+
+      // 更新状态数值与文字
+      document.getElementById('depth-readout').textContent = data.depth;
+      renderSignals(data.signals);
+      document.getElementById('profile-current').textContent = data.current;
+      document.getElementById('profile-fallback').textContent = data.fallback;
+
+      document.getElementById('val-alpha').textContent = data.waves.alpha;
+      document.getElementById('val-beta').textContent = data.waves.beta;
+      document.getElementById('val-theta').textContent = data.waves.theta;
+      document.getElementById('val-gamma').textContent = data.waves.gamma;
+      document.getElementById('val-sync').textContent = data.waves.sync;
+
+      document.getElementById('old-loop-pct').textContent = data.oldLoop + '%';
+      document.getElementById('old-loop-bar').style.width = data.oldLoop + '%';
+      document.getElementById('new-loop-pct').textContent = data.newLoop + '%';
+      document.getElementById('new-loop-bar').style.width = data.newLoop + '%';
+
+      document.getElementById('phase-tag').textContent = `PHASE ${data.code} / 07`;
+      document.getElementById('phase-title').textContent = data.phaseTitle;
+      document.getElementById('phase-quote').innerHTML = data.quote;
+      document.getElementById('voice-text').textContent = data.voice;
+      document.getElementById('footer-label-text').textContent = data.label;
+      document.getElementById('footer-choice-text').textContent = data.choice;
+
+      // 高亮对应 3D 脑区卡片
+      document.querySelectorAll('.brain-callout').forEach(card => {
+        card.classList.toggle('active', card.dataset.region === selectedRegionKey);
+      });
+
+      // 触发 3D 相机平滑过渡与神经脉冲更新
+      if (window.targetCameraPosition) {
+        window.targetCameraPosition.set(data.camPos.x, data.camPos.y, data.camPos.z);
+      }
+      if (window.highlightBrainRegion3D) {
+        window.highlightBrainRegion3D(selectedRegionKey, idx);
+      }
+    }
+
+    /********************************************************************
+     * 3. Three.js 3D 全息侧脸与发光神经脑核心构建
+     ********************************************************************/
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0.0, 6.3);
+    window.targetCameraPosition = new THREE.Vector3(0, 0.0, 6.3);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.enablePan = false;
+    controls.minDistance = 4.2;
+    controls.maxDistance = 9.0;
+    controls.maxPolarAngle = Math.PI * 0.72;
+    controls.minPolarAngle = Math.PI * 0.28;
+
+    const rootGroup = new THREE.Group();
+    // 稍微偏上以留出下方旁白空间，复刻原图构图
+    rootGroup.position.set(0.02, 0.16, 0);
+    scene.add(rootGroup);
+
+    // 生成柔和发光圆形粒子贴图
+    function createGlowTexture(colorCenter, colorMid, colorEdge = 'rgba(0,0,0,0)') {
+      const c = document.createElement('canvas');
+      c.width = 64;
+      c.height = 64;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, colorCenter);
+      grad.addColorStop(0.35, colorMid);
+      grad.addColorStop(1, colorEdge);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const glowTexWhite = createGlowTexture('rgba(255,255,255,1)', 'rgba(180,235,255,0.65)');
+    const glowTexPink = createGlowTexture('rgba(255,230,245,1)', 'rgba(255,42,133,0.75)');
+    const glowTexCyan = createGlowTexture('rgba(220,255,255,1)', 'rgba(0,240,255,0.75)');
+
+    // ------------------------------------------------------------------
+    // 3.1 构建面朝右侧的 3D 半透明解剖侧脸轮廓网格 + 点云 (1:1 匹配原图侧脸)
+    // ------------------------------------------------------------------
+    function getHeadProfileRadius(y, phi) {
+      // y 从 -1.65 (颈部底) 到 +1.45 (头顶)
+      // phi = 0 指向右侧 (+X，即鼻尖/面部正前方)，phi = PI 指向后脑勺 (-X)
+      const cosP = Math.cos(phi);
+      const sinP = Math.sin(phi);
+      const frontFactor = Math.max(0, cosP);
+      const frontSharp = Math.pow(frontFactor, 5); // 鼻梁、唇部、下巴锐度
+      const backFactor = Math.max(0, -cosP);
+
+      let rx = 1.0;
+      let rz = 0.88;
+
+      if (y > 0.25) {
+        // 颅顶与前额
+        const t = (y - 0.25) / 1.2;
+        const dome = Math.sqrt(Math.max(0, 1 - t * t));
+        rx = 1.22 * dome;
+        rz = 1.02 * dome;
+        // 前额饱满度
+        rx += frontFactor * 0.14 * Math.sin(t * Math.PI);
+        // 后脑勺枕骨弧度
+        rx += backFactor * 0.18 * Math.sin(t * Math.PI * 0.85);
+      } else if (y > -0.92) {
+        // 面部区域 (眉弓、鼻梁、鼻尖、上下唇、下巴)
+        const f = (0.25 - y) / 1.17; // 0 (眉心) -> 1 (下巴底)
+        rx = 1.12 - f * 0.28;
+        rz = 0.96 - f * 0.24;
+
+        // 精细侧脸轮廓曲线 (f 从 0 到 1)
+        let profileBump = 0;
+        // 眉弓 (f ~ 0.08)
+        profileBump += 0.09 * Math.exp(-Math.pow((f - 0.06) / 0.06, 2));
+        // 山根凹陷 (f ~ 0.15)
+        profileBump -= 0.05 * Math.exp(-Math.pow((f - 0.15) / 0.05, 2));
+        // 鼻梁与鼻尖突起 (f ~ 0.38)
+        profileBump += 0.34 * Math.exp(-Math.pow((f - 0.39) / 0.11, 2));
+        // 人中微凹 (f ~ 0.50)
+        profileBump -= 0.04 * Math.exp(-Math.pow((f - 0.50) / 0.04, 2));
+        // 上唇 (f ~ 0.57)
+        profileBump += 0.15 * Math.exp(-Math.pow((f - 0.57) / 0.045, 2));
+        // 唇间裂微凹 (f ~ 0.63)
+        profileBump += 0.04 * Math.exp(-Math.pow((f - 0.63) / 0.03, 2));
+        // 下唇 (f ~ 0.69)
+        profileBump += 0.13 * Math.exp(-Math.pow((f - 0.69) / 0.05, 2));
+        // 颏唇沟凹陷 (f ~ 0.78)
+        profileBump -= 0.05 * Math.exp(-Math.pow((f - 0.78) / 0.045, 2));
+        // 下巴颏部前突 (f ~ 0.90)
+        profileBump += 0.15 * Math.exp(-Math.pow((f - 0.90) / 0.08, 2));
+
+        rx += frontSharp * profileBump;
+
+        // 眼窝微凹
+        const eyeSocket = Math.exp(-Math.pow((f - 0.18) / 0.08, 2)) * Math.exp(-Math.pow((Math.abs(phi) - 0.42) / 0.2, 2));
+        rx -= eyeSocket * 0.11;
+
+        // 后脑下部向颈部收拢
+        rx -= backFactor * f * 0.35;
+      } else {
+        // 颈部区域 (y: -0.92 -> -1.65)
+        const n = (-0.92 - y) / 0.73; // 0 -> 1
+        rx = 0.64 + n * 0.08;
+        rz = 0.58 + n * 0.06;
+        // 喉结与前颈曲线
+        rx -= frontFactor * (0.16 - n * 0.08);
+        // 后颈斜方肌延伸
+        rx += backFactor * (0.12 + n * 0.18);
+      }
+
+      const x = rx * cosP;
+      const z = rz * sinP;
+      return new THREE.Vector3(x, y, z);
+    }
+
+    function buildHeadWireframeAndPoints() {
+      const headGroup = new THREE.Group();
+      const ySteps = 56;
+      const phiSteps = 64;
+      const vertices = [];
+      const linePositions = [];
+      const colors = [];
+
+      const grid = [];
+      for (let i = 0; i <= ySteps; i++) {
+        const v = i / ySteps;
+        const y = -1.62 + v * 3.07;
+        const row = [];
+        for (let j = 0; j <= phiSteps; j++) {
+          const u = j / phiSteps;
+          const phi = u * Math.PI * 2;
+          const pt = getHeadProfileRadius(y, phi);
+          // 整体向后微移一点点让面部居中偏右
+          pt.x += 0.06;
+          row.push(pt);
+
+          vertices.push(pt.x, pt.y, pt.z);
+          // 侧脸轮廓前沿 (+X) 与后脑边缘更亮
+          const rim = Math.pow(Math.abs(Math.cos(phi)), 2.2) * 0.7 + 0.3;
+          const c = new THREE.Color().setHSL(0.55, 0.95, 0.38 + rim * 0.32);
+          colors.push(c.r, c.g, c.b);
+        }
+        grid.push(row);
+      }
+
+      // 构建精细科技感三角/四边形经纬网线
+      for (let i = 0; i < ySteps; i++) {
+        for (let j = 0; j < phiSteps; j++) {
+          const p1 = grid[i][j];
+          const p2 = grid[i + 1][j];
+          const p3 = grid[i][j + 1];
+          linePositions.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+          linePositions.push(p1.x, p1.y, p1.z, p3.x, p3.y, p3.z);
+          // 对角斜线增强多边形网格感
+          if ((i + j) % 2 === 0) {
+            linePositions.push(p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+          }
+        }
+      }
+
+      const lineGeo = new THREE.BufferGeometry();
+      lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+      const lineMat = new THREE.LineBasicMaterial({
+        color: 0x1e88e5,
+        transparent: true,
+        opacity: 0.14,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      headGroup.add(new THREE.LineSegments(lineGeo, lineMat));
+
+      // 构建侧脸高光轮廓带（突出鼻梁、嘴唇、下巴、前额弧线）
+      const silhouettePoints = [];
+      for (let i = 0; i <= 120; i++) {
+        const y = -1.62 + (i / 120) * 3.07;
+        const pFront = getHeadProfileRadius(y, 0);
+        pFront.x += 0.06;
+        silhouettePoints.push(pFront);
+      }
+      const silGeo = new THREE.BufferGeometry().setFromPoints(silhouettePoints);
+      const silMat = new THREE.LineBasicMaterial({
+        color: 0x70e8ff,
+        transparent: true,
+        opacity: 0.72,
+        blending: THREE.AdditiveBlending
+      });
+      headGroup.add(new THREE.Line(silGeo, silMat));
+
+      // 头部点云层
+      const ptGeo = new THREE.BufferGeometry();
+      ptGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      ptGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      const ptMat = new THREE.PointsMaterial({
+        size: 0.032,
+        map: glowTexWhite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.48,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      headGroup.add(new THREE.Points(ptGeo, ptMat));
+
+      return headGroup;
+    }
+
+    rootGroup.add(buildHeadWireframeAndPoints());
+
+    // ------------------------------------------------------------------
+    // 3.2 六大核心脑区 3D 坐标与发光神经团、脑沟回粒子云、小脑与脑干
+    // ------------------------------------------------------------------
+    const BRAIN_REGIONS_3D = {
+      pfc:  { name: '前额叶皮层', pos: new THREE.Vector3(0.55, 0.56, 0.18),  color: 0xff2a85, subColor: 0x00f0ff },
+      amyg: { name: '杏仁核',     pos: new THREE.Vector3(0.08, -0.02, 0.22), color: 0xff2a85, subColor: 0xff9e00 },
+      str:  { name: '纹状体',     pos: new THREE.Vector3(0.18, 0.22, -0.05), color: 0x9d4edd, subColor: 0x00f0ff },
+      par:  { name: '顶叶皮层',   pos: new THREE.Vector3(-0.32, 0.86, 0.12), color: 0x00f0ff, subColor: 0x9d4edd },
+      hpc:  { name: '海马体',     pos: new THREE.Vector3(-0.14, 0.06, -0.18),color: 0x00f0ff, subColor: 0xffbe0b },
+      ins:  { name: '岛叶皮层',   pos: new THREE.Vector3(0.32, 0.12, 0.28),  color: 0x00f0ff, subColor: 0xff2a85 }
+    };
+
+    const brainGroup = new THREE.Group();
+    rootGroup.add(brainGroup);
+
+    // 构建大脑皮层沟回高密度发光粒子云 + 小脑 + 脑干
+    function buildBrainParticleCloud() {
+      const count = 6800;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      const cPink = new THREE.Color(0xff2a85);
+      const cPurple = new THREE.Color(0x9d4edd);
+      const cCyan = new THREE.Color(0x00f0ff);
+      const cGold = new THREE.Color(0xffaa00);
+      const cBlue = new THREE.Color(0x3a86ff);
+
+      for (let i = 0; i < count; i++) {
+        let x, y, z;
+        const c = new THREE.Color();
+
+        if (i < count * 0.76) {
+          // 大脑左右半球皮层与内部核团
+          const u = Math.random();
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          // 偏向表面形成脑沟回质感
+          const rBase = Math.pow(u, 0.28);
+          // 脑沟褶皱正弦调制
+          const gyri = 1 + 0.065 * Math.sin(theta * 10) * Math.cos(phi * 8);
+
+          x = rBase * gyri * 0.96 * Math.sin(phi) * Math.cos(theta) - 0.04;
+          y = rBase * gyri * 0.74 * Math.cos(phi) + 0.42;
+          z = rBase * gyri * 0.72 * Math.sin(phi) * Math.sin(theta);
+
+          // 底部平坦化与前额微倾
+          if (y < 0.02) {
+            y = 0.02 + (y - 0.02) * 0.35;
+          }
+          // 左右脑纵裂微凹
+          if (Math.abs(z) < 0.06 && y > 0.35) {
+            z += (z >= 0 ? 0.04 : -0.04);
+          }
+
+          // 根据脑区位置赋予原图同款渐变色彩（前额与边缘系统偏品红/暖金，顶枕与海马偏青紫）
+          const distPFC = Math.hypot(x - 0.45, y - 0.55, z);
+          const distCore = Math.hypot(x - 0.05, y - 0.12, z);
+          if (distCore < 0.36) {
+            c.lerpColors(cGold, cPink, Math.random() * 0.75);
+          } else if (distPFC < 0.55) {
+            c.lerpColors(cPink, cPurple, Math.random() * 0.7);
+          } else if (x < -0.15 && y > 0.45) {
+            c.lerpColors(cPurple, cCyan, Math.random() * 0.85);
+          } else {
+            c.lerpColors(cCyan, cBlue, Math.random() * 0.65);
+          }
+        } else if (i < count * 0.91) {
+          // 小脑 (位于后下方，带横向纹理)
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const r = Math.pow(Math.random(), 0.32);
+          const folia = 1 + 0.05 * Math.sin(phi * 22);
+          x = -0.52 + r * folia * 0.36 * Math.sin(phi) * Math.cos(theta);
+          y = -0.18 + r * folia * 0.25 * Math.cos(phi);
+          z = r * folia * 0.32 * Math.sin(phi) * Math.sin(theta);
+          c.lerpColors(cBlue, cCyan, 0.5 + 0.4 * Math.sin(y * 30));
+        } else {
+          // 脑干与下行神经束
+          const t = Math.random();
+          const angle = Math.random() * Math.PI * 2;
+          const rad = (0.14 - t * 0.04) * Math.sqrt(Math.random());
+          x = -0.14 - t * 0.22 + Math.cos(angle) * rad;
+          y = -0.05 - t * 1.15;
+          z = Math.sin(angle) * rad;
+          c.lerpColors(cPink, cCyan, t);
+        }
+
+        positions[i * 3] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
+
+        colors[i * 3] = c.r;
+        colors[i * 3 + 1] = c.g;
+        colors[i * 3 + 2] = c.b;
+
+        sizes[i] = 0.035 + Math.random() * 0.045;
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const mat = new THREE.PointsMaterial({
+        size: 0.046,
+        map: glowTexWhite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.82,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const cloud = new THREE.Points(geo, mat);
+      brainGroup.add(cloud);
+      return cloud;
+    }
+
+    const brainCloud = buildBrainParticleCloud();
+
+    // ------------------------------------------------------------------
+    // 3.3 构建脑内发光枢纽节点、神经纤维传导束与流动动作电位粒子
+    // ------------------------------------------------------------------
+    const regionNodes3D = {};
+    const pulseParticlesData = [];
+
+    Object.entries(BRAIN_REGIONS_3D).forEach(([key, info]) => {
+      const nodeGroup = new THREE.Group();
+      nodeGroup.position.copy(info.pos);
+
+      // 核心亮球
+      const coreGeo = new THREE.SphereGeometry(0.055, 16, 16);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.95
+      });
+      nodeGroup.add(new THREE.Mesh(coreGeo, coreMat));
+
+      // 外层辉光精灵
+      const spriteMat = new THREE.SpriteMaterial({
+        map: info.color === 0xff2a85 ? glowTexPink : glowTexCyan,
+        color: info.color,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(0.55, 0.55, 1);
+      nodeGroup.add(sprite);
+
+      brainGroup.add(nodeGroup);
+      regionNodes3D[key] = { group: nodeGroup, sprite, baseScale: 0.55, info };
+    });
+
+    // 构建复杂的脑区神经回路曲线束 + 脉冲流光
+    const TRACT_CONNECTIONS = [
+      ['pfc', 'amyg', 0xff2a85, 0.25],
+      ['pfc', 'str',  0xff6b9d, 0.18],
+      ['pfc', 'par',  0x00f0ff, 0.22],
+      ['pfc', 'ins',  0xffbe0b, 0.15],
+      ['amyg', 'hpc', 0xff2a85, -0.15],
+      ['amyg', 'ins', 0xff9e00, 0.12],
+      ['amyg', 'str', 0x9d4edd, 0.16],
+      ['str', 'hpc',  0x00f0ff, 0.20],
+      ['par', 'hpc',  0x9d4edd, 0.24],
+      ['ins', 'hpc',  0x00f0ff, -0.18]
+    ];
+
+    function buildNeuralTracts() {
+      const pulsePosArray = [];
+      const pulseColArray = [];
+
+      TRACT_CONNECTIONS.forEach(([fromKey, toKey, hexColor, arcHeight]) => {
+        const pStart = BRAIN_REGIONS_3D[fromKey].pos;
+        const pEnd = BRAIN_REGIONS_3D[toKey].pos;
+
+        // 每个连接生成 3 条微偏移神经纤维束，营造原图密集发光神经网质感
+        for (let b = 0; b < 3; b++) {
+          const mid = new THREE.Vector3().addVectors(pStart, pEnd).multiplyScalar(0.5);
+          mid.y += arcHeight + (b - 1) * 0.06;
+          mid.z += (b - 1) * 0.08;
+
+          const curve = new THREE.QuadraticBezierCurve3(pStart, mid, pEnd);
+          const pts = curve.getPoints(44);
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+          const lineMat = new THREE.LineBasicMaterial({
+            color: hexColor,
+            transparent: true,
+            opacity: b === 1 ? 0.68 : 0.32,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+          });
+          brainGroup.add(new THREE.Line(lineGeo, lineMat));
+
+          // 为每条神经束绑定 4 个沿曲线高速流动的神经电脉冲粒子
+          const c = new THREE.Color(hexColor);
+          for (let k = 0; k < 4; k++) {
+            pulseParticlesData.push({
+              curve,
+              t: Math.random(),
+              speed: 0.004 + Math.random() * 0.006
+            });
+            pulsePosArray.push(0, 0, 0);
+            pulseColArray.push(c.r, c.g, c.b);
+          }
+        }
+      });
+
+      const pulseGeo = new THREE.BufferGeometry();
+      pulseGeo.setAttribute('position', new THREE.Float32BufferAttribute(pulsePosArray, 3));
+      pulseGeo.setAttribute('color', new THREE.Float32BufferAttribute(pulseColArray, 3));
+
+      const pulseMat = new THREE.PointsMaterial({
+        size: 0.11,
+        map: glowTexWhite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const pulsePointsMesh = new THREE.Points(pulseGeo, pulseMat);
+      brainGroup.add(pulsePointsMesh);
+      return pulsePointsMesh;
+    }
+
+    const pulsePointsMesh = buildNeuralTracts();
+
+    // 环绕人头的 3D 科技星尘与多层轨道环
+    function buildOrbitalRingsAndDust() {
+      const ringGroup = new THREE.Group();
+
+      // 外围浮动微粒星尘
+      const dustCount = 420;
+      const dustPos = new Float32Array(dustCount * 3);
+      const dustCol = new Float32Array(dustCount * 3);
+      for (let i = 0; i < dustCount; i++) {
+        const r = 1.45 + Math.random() * 1.4;
+        const theta = Math.random() * Math.PI * 2;
+        const y = (Math.random() - 0.5) * 3.2;
+        dustPos[i * 3] = Math.cos(theta) * r;
+        dustPos[i * 3 + 1] = y;
+        dustPos[i * 3 + 2] = Math.sin(theta) * r * 0.6;
+
+        const c = Math.random() > 0.45 ? new THREE.Color(0x00f0ff) : new THREE.Color(0xff2a85);
+        dustCol[i * 3] = c.r;
+        dustCol[i * 3 + 1] = c.g;
+        dustCol[i * 3 + 2] = c.b;
+      }
+      const dustGeo = new THREE.BufferGeometry();
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+      dustGeo.setAttribute('color', new THREE.BufferAttribute(dustCol, 3));
+      const dustMat = new THREE.PointsMaterial({
+        size: 0.045,
+        map: glowTexWhite,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      ringGroup.add(new THREE.Points(dustGeo, dustMat));
+
+      rootGroup.add(ringGroup);
+      return ringGroup;
+    }
+
+    const orbitalDustGroup = buildOrbitalRingsAndDust();
+
+    // 脑区高亮反馈方法
+    window.highlightBrainRegion3D = function (regionKey) {
+      Object.entries(regionNodes3D).forEach(([k, obj]) => {
+        if (k === regionKey) {
+          obj.baseScale = 0.82;
+          obj.sprite.material.opacity = 1.0;
+        } else {
+          obj.baseScale = 0.50;
+          obj.sprite.material.opacity = 0.78;
+        }
+      });
+    };
+
+    // 点击 6 个脑区卡片或左侧网络列表时联动聚焦
+    document.querySelectorAll('.brain-callout, .network-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const region = el.dataset.region;
+        if (!region || !BRAIN_REGIONS_3D[region]) return;
+        selectedRegionKey = region;
+        document.querySelectorAll('.brain-callout').forEach(c => {
+          c.classList.toggle('active', c.dataset.region === region);
+        });
+        window.highlightBrainRegion3D(region);
+      });
+    });
+
+    /********************************************************************
+     * 4. 动态 SVG HUD 刻度环与 3D 脑区实时引线绘制
+     ********************************************************************/
+    const svgLayer = document.getElementById('hud-svg-layer');
+
+    function updateHUDAndLeaderLines() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // 将 rootGroup 中心投影到屏幕，绘制原图背景同心刻度环与 PFC / sACC / STR / HNE 标记
+      const headCenterWorld = new THREE.Vector3(0.0, 0.25, 0);
+      headCenterWorld.applyMatrix4(rootGroup.matrixWorld);
+      const centerNDC = headCenterWorld.clone().project(camera);
+      const cx = (centerNDC.x * 0.5 + 0.5) * w;
+      const cy = (-centerNDC.y * 0.5 + 0.5) * h;
+      const rBase = Math.min(w, h) * 0.34;
+
+      let svgContent = `
+        <defs>
+          <linearGradient id="ringGradCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.55"/>
+            <stop offset="50%" stop-color="#ff2a85" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.15"/>
+          </linearGradient>
+        </defs>
+        <!-- 外围全息刻度圆环 -->
+        <circle cx="${cx}" cy="${cy}" r="${rBase}" fill="none" stroke="url(#ringGradCyan)" stroke-width="1" stroke-dasharray="6 4 2 4" opacity="0.55"/>
+        <circle cx="${cx}" cy="${cy}" r="${rBase * 1.07}" fill="none" stroke="#00f0ff" stroke-width="0.7" stroke-dasharray="1 8" opacity="0.45"/>
+        <circle cx="${cx}" cy="${cy}" r="${rBase * 0.88}" fill="none" stroke="#ff2a85" stroke-width="0.8" stroke-dasharray="40 120" opacity="0.4"/>
+        <!-- 环上脑区坐标代号 (复刻原图 PFC / sACC / STR / HNE) -->
+        <text x="${cx - rBase * 0.16}" y="${cy - rBase * 0.94}" fill="#00f0ff" font-family="monospace" font-size="10" opacity="0.75">PFC</text>
+        <text x="${cx - rBase * 0.86}" y="${cy - rBase * 0.25}" fill="#00f0ff" font-family="monospace" font-size="9" opacity="0.65">sACC</text>
+        <text x="${cx - rBase * 0.74}" y="${cy + rBase * 0.35}" fill="#00f0ff" font-family="monospace" font-size="9" opacity="0.65">STR</text>
+        <text x="${cx + rBase * 0.88}" y="${cy - rBase * 0.32}" fill="#00f0ff" font-family="monospace" font-size="9" opacity="0.65">HNE</text>
+        <text x="${cx + rBase * 0.16}" y="${cy + rBase * 0.44}" fill="#ff2a85" font-family="monospace" font-size="9" opacity="0.75">STR</text>
+      `;
+
+      // 遍历 6 个脑区卡片，计算 3D 脑区投影点与卡片锚点之间的折线
+      Object.entries(BRAIN_REGIONS_3D).forEach(([key, info]) => {
+        const cardEl = document.getElementById(`callout-${key}`);
+        if (!cardEl) return;
+        const rect = cardEl.getBoundingClientRect();
+
+        // 计算 3D 脑区世界坐标并投影到屏幕坐标
+        const worldPos = info.pos.clone();
+        brainGroup.localToWorld(worldPos);
+        const ndc = worldPos.project(camera);
+        const tx = (ndc.x * 0.5 + 0.5) * w;
+        const ty = (-ndc.y * 0.5 + 0.5) * h;
+
+        // 判断卡片在左侧还是右侧
+        const isLeftCard = (rect.left + rect.width * 0.5) < cx;
+        const startX = isLeftCard ? rect.right + 6 : rect.left - 6;
+        const startY = rect.top + 18;
+        const elbowX = isLeftCard ? startX + 26 : startX - 26;
+        const elbowY = startY;
+
+        const isFocused = (key === selectedRegionKey);
+        const strokeCol = isFocused ? '#ff2a85' : (key === 'amyg' ? '#c744ff' : '#00f0ff');
+        const dotFill = isFocused ? '#ff2a85' : '#00f0ff';
+
+        svgContent += `
+          <!-- 卡片侧锚点小圆框 -->
+          <circle cx="${startX}" cy="${startY}" r="5" fill="rgba(4,14,30,0.9)" stroke="${strokeCol}" stroke-width="1.3"/>
+          <circle cx="${startX}" cy="${startY}" r="2.2" fill="${dotFill}"/>
+          <!-- 3D 脑区折线引线 -->
+          <polyline points="${startX},${startY} ${elbowX},${elbowY} ${tx},${ty}"
+            fill="none" stroke="${strokeCol}" stroke-width="${isFocused ? 1.6 : 1.1}" opacity="${isFocused ? 0.92 : 0.65}"/>
+          <!-- 3D 脑区落点光圈 -->
+          <circle cx="${tx}" cy="${ty}" r="3.2" fill="#ffffff" stroke="${strokeCol}" stroke-width="1.5"/>
+        `;
+      });
+
+      svgLayer.innerHTML = svgContent;
+    }
+
+    /********************************************************************
+     * 5. 2D 辅助 Canvas 实时绘制（左侧小脑图、示波器、卡片脑电波、右侧7层全息圆盘、3视图扫描）
+     ********************************************************************/
+    // 5.1 左侧 PROFILE 迷你侧脸脑扫描 Canvas
+    const miniHeadCanvas = document.getElementById('mini-head-canvas');
+    const miniHeadCtx = miniHeadCanvas.getContext('2d');
+
+    function drawMiniHeadScan(time) {
+      const w = miniHeadCanvas.width;
+      const h = miniHeadCanvas.height;
+      miniHeadCtx.clearRect(0, 0, w, h);
+
+      // 背景十字准星网格
+      miniHeadCtx.strokeStyle = 'rgba(0, 240, 255, 0.14)';
+      miniHeadCtx.lineWidth = 1;
+      miniHeadCtx.beginPath();
+      miniHeadCtx.moveTo(w * 0.5, 0); miniHeadCtx.lineTo(w * 0.5, h);
+      miniHeadCtx.moveTo(0, h * 0.48); miniHeadCtx.lineTo(w, h * 0.48);
+      miniHeadCtx.stroke();
+
+      // 绘制侧脸轮廓线
+      miniHeadCtx.save();
+      miniHeadCtx.translate(w * 0.48, h * 0.52);
+      miniHeadCtx.strokeStyle = 'rgba(0, 240, 255, 0.65)';
+      miniHeadCtx.lineWidth = 1.2;
+      miniHeadCtx.beginPath();
+      for (let i = 0; i <= 48; i++) {
+        const yNorm = -1.5 + (i / 48) * 2.9;
+        const p = getHeadProfileRadius(yNorm, 0);
+        const px = p.x * 26;
+        const py = -p.y * 32;
+        if (i === 0) miniHeadCtx.moveTo(px, py);
+        else miniHeadCtx.lineTo(px, py);
+      }
+      for (let i = 48; i >= 0; i--) {
+        const yNorm = -1.5 + (i / 48) * 2.9;
+        const p = getHeadProfileRadius(yNorm, Math.PI);
+        const px = p.x * 26;
+        const py = -p.y * 32;
+        miniHeadCtx.lineTo(px, py);
+      }
+      miniHeadCtx.closePath();
+      miniHeadCtx.stroke();
+
+      // 脑区内部发光高亮
+      const grad = miniHeadCtx.createRadialGradient(2, -12, 2, 0, -10, 26);
+      grad.addColorStop(0, 'rgba(255, 42, 133, 0.9)');
+      grad.addColorStop(0.5, 'rgba(157, 78, 221, 0.45)');
+      grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      miniHeadCtx.fillStyle = grad;
+      miniHeadCtx.beginPath();
+      miniHeadCtx.ellipse(0, -10, 24, 19, 0, 0, Math.PI * 2);
+      miniHeadCtx.fill();
+
+      // 中心闪烁靶点
+      const pulseR = 2.5 + Math.sin(time * 4) * 1.2;
+      miniHeadCtx.fillStyle = '#ffffff';
+      miniHeadCtx.beginPath();
+      miniHeadCtx.arc(3, -11, pulseR, 0, Math.PI * 2);
+      miniHeadCtx.fill();
+      miniHeadCtx.restore();
+    }
+
+    // 5.2 左侧 NEURAL ACTIVITY 多通道示波器
+    const oscCanvas = document.getElementById('oscilloscope-canvas');
+    const oscCtx = oscCanvas.getContext('2d');
+
+    function drawOscilloscope(time) {
+      const w = oscCanvas.width;
+      const h = oscCanvas.height;
+      oscCtx.clearRect(0, 0, w, h);
+
+      // 网格背景
+      oscCtx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+      oscCtx.lineWidth = 0.8;
+      for (let x = 0; x < w; x += 25) {
+        oscCtx.beginPath(); oscCtx.moveTo(x, 0); oscCtx.lineTo(x, h); oscCtx.stroke();
+      }
+      for (let y = 0; y < h; y += 20) {
+        oscCtx.beginPath(); oscCtx.moveTo(0, y); oscCtx.lineTo(w, y); oscCtx.stroke();
+      }
+
+      const waves = [
+        { color: 'rgba(255, 42, 133, 0.9)', freq: 0.06, speed: 3.2, amp: 22, phase: 0 },
+        { color: 'rgba(0, 240, 255, 0.85)', freq: 0.045, speed: -2.4, amp: 16, phase: 1.5 },
+        { color: 'rgba(157, 78, 221, 0.75)', freq: 0.08, speed: 4.1, amp: 12, phase: 3.1 },
+        { color: 'rgba(255, 190, 11, 0.55)', freq: 0.11, speed: 2.0, amp: 8, phase: 0.7 }
+      ];
+
+      waves.forEach(wv => {
+        oscCtx.strokeStyle = wv.color;
+        oscCtx.lineWidth = 1.4;
+        oscCtx.beginPath();
+        for (let x = 0; x <= w; x += 2) {
+          const env = Math.sin((x / w) * Math.PI);
+          const y = h * 0.5 +
+            Math.sin(x * wv.freq + time * wv.speed + wv.phase) * wv.amp * env +
+            Math.cos(x * 0.13 - time * 1.8) * 4 * env;
+          if (x === 0) oscCtx.moveTo(x, y);
+          else oscCtx.lineTo(x, y);
+        }
+        oscCtx.stroke();
+      });
+    }
+
+    // 5.3 6 个脑区卡片内部的动态 EEG 波形
+    const calloutWaveCanvases = Array.from(document.querySelectorAll('.callout-wave'));
+
+    function drawCalloutWaves(time) {
+      calloutWaveCanvases.forEach((cvs, idx) => {
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width;
+        const h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.strokeStyle = idx === 1 ? '#ff2a85' : '#00f0ff';
+        ctx.lineWidth = 1.15;
+        ctx.beginPath();
+        for (let x = 0; x < w; x += 2) {
+          const spike = Math.sin(x * 0.25 + time * 5 + idx * 1.3) *
+                        Math.cos(x * 0.09 - time * 3 + idx) * 6.5;
+          const y = h * 0.5 + spike;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+    }
+
+    // 5.4 右侧 SCENE MAP 7层全息脑切面圆盘堆叠 (支持点击对应层切换场景)
+    const holoStackCanvas = document.getElementById('holo-stack-canvas');
+    const holoStackCtx = holoStackCanvas.getContext('2d');
+
+    function drawHoloStack(time) {
+      const w = holoStackCanvas.width;
+      const h = holoStackCanvas.height;
+      holoStackCtx.clearRect(0, 0, w, h);
+
+      const cx = w * 0.54;
+      const topY = 20;
+      const spacing = 29.5;
+
+      // 中心贯穿光轴
+      holoStackCtx.strokeStyle = 'rgba(0, 240, 255, 0.28)';
+      holoStackCtx.lineWidth = 1;
+      holoStackCtx.beginPath();
+      holoStackCtx.moveTo(cx, 8);
+      holoStackCtx.lineTo(cx, h - 8);
+      holoStackCtx.stroke();
+
+      for (let i = 0; i < 7; i++) {
+        const cy = topY + i * spacing;
+        const isActive = (i === activeSceneIndex);
+        const rx = isActive ? 46 : 39;
+        const ry = isActive ? 14.5 : 11.5;
+
+        holoStackCtx.save();
+        // 选中层发光光晕
+        if (isActive) {
+          const glow = holoStackCtx.createRadialGradient(cx, cy, 2, cx, cy, rx * 1.15);
+          glow.addColorStop(0, 'rgba(255, 42, 133, 0.75)');
+          glow.addColorStop(0.55, 'rgba(157, 78, 221, 0.35)');
+          glow.addColorStop(1, 'rgba(0, 240, 255, 0)');
+          holoStackCtx.fillStyle = glow;
+          holoStackCtx.beginPath();
+          holoStackCtx.ellipse(cx, cy, rx * 1.15, ry * 1.35, 0, 0, Math.PI * 2);
+          holoStackCtx.fill();
+
+          // 左侧序号连接标示 "05 ----"
+          holoStackCtx.fillStyle = '#ffffff';
+          holoStackCtx.font = 'bold 10px monospace';
+          holoStackCtx.fillText(SCENES_DATA[i].code, 2, cy + 3);
+          holoStackCtx.strokeStyle = 'rgba(255, 42, 133, 0.75)';
+          holoStackCtx.beginPath();
+          holoStackCtx.moveTo(16, cy);
+          holoStackCtx.lineTo(cx - rx, cy);
+          holoStackCtx.stroke();
+        }
+
+        // 椭圆脑切面外环
+        holoStackCtx.strokeStyle = isActive ? '#ff2a85' : 'rgba(0, 240, 255, 0.42)';
+        holoStackCtx.lineWidth = isActive ? 1.6 : 1.0;
+        holoStackCtx.fillStyle = isActive ? 'rgba(255, 42, 133, 0.18)' : 'rgba(6, 24, 48, 0.55)';
+        holoStackCtx.beginPath();
+        holoStackCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        holoStackCtx.fill();
+        holoStackCtx.stroke();
+
+        // 内部左右脑叶全息纹理
+        holoStackCtx.strokeStyle = isActive ? 'rgba(255, 190, 230, 0.8)' : 'rgba(0, 240, 255, 0.25)';
+        holoStackCtx.lineWidth = 0.8;
+        holoStackCtx.beginPath();
+        holoStackCtx.ellipse(cx - rx * 0.26, cy, rx * 0.35, ry * 0.62, 0.1, 0, Math.PI * 2);
+        holoStackCtx.stroke();
+        holoStackCtx.beginPath();
+        holoStackCtx.ellipse(cx + rx * 0.26, cy, rx * 0.35, ry * 0.62, -0.1, 0, Math.PI * 2);
+        holoStackCtx.stroke();
+
+        // 中心核点
+        holoStackCtx.fillStyle = isActive ? '#ffffff' : '#00f0ff';
+        holoStackCtx.beginPath();
+        holoStackCtx.arc(cx, cy, isActive ? 2.6 : 1.5, 0, Math.PI * 2);
+        holoStackCtx.fill();
+
+        holoStackCtx.restore();
+      }
+    }
+
+    // 点击 7 层全息圆盘切换对应阶段
+    holoStackCanvas.addEventListener('click', (e) => {
+      const rect = holoStackCanvas.getBoundingClientRect();
+      const y = (e.clientY - rect.top) * (holoStackCanvas.height / rect.height);
+      const idx = Math.min(6, Math.max(0, Math.round((y - 20) / 29.5)));
+      switchScene(idx);
+    });
+
+    // 5.5 右下 BRAIN SCAN . LIVE 三视图实时断层扫描
+    const scanCanvases = [
+      document.getElementById('scan-canvas-0'),
+      document.getElementById('scan-canvas-1'),
+      document.getElementById('scan-canvas-2')
+    ];
+
+    function drawBrainScans(time) {
+      scanCanvases.forEach((cvs, mode) => {
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width;
+        const h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w * 0.5;
+        const cy = h * 0.5;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        if (mode === 0) {
+          // 轴位切面 (Axial)
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.65)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(-7, 0, 17, 29, 0.05, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(7, 0, 17, 29, -0.05, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 动态粉青激活热区
+          const g = ctx.createRadialGradient(0, -4, 1, 0, -4, 22);
+          g.addColorStop(0, 'rgba(255, 42, 133, 0.85)');
+          g.addColorStop(0.6, 'rgba(0, 240, 255, 0.35)');
+          g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0, -4, 20, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (mode === 1) {
+          // 矢状位切面 (Sagittal)
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.65)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(0, -6, 26, 21, -0.15, 0, Math.PI * 2);
+          ctx.stroke();
+          // 脑干延伸
+          ctx.beginPath();
+          ctx.moveTo(-4, 8);
+          ctx.lineTo(-9, 30);
+          ctx.moveTo(4, 8);
+          ctx.lineTo(1, 30);
+          ctx.stroke();
+
+          const g = ctx.createRadialGradient(3, -8, 1, 3, -8, 20);
+          g.addColorStop(0, 'rgba(255, 42, 133, 0.85)');
+          g.addColorStop(0.55, 'rgba(157, 78, 221, 0.45)');
+          g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(3, -8, 20, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 冠状位切面 (Coronal)
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.65)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 24, 27, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 对称蝴蝶状脑室高光
+          const pulse = 0.75 + 0.25 * Math.sin(time * 3.5);
+          ctx.fillStyle = `rgba(255, 42, 133, ${0.75 * pulse})`;
+          ctx.beginPath();
+          ctx.ellipse(-6, 0, 6, 11, 0.25, 0, Math.PI * 2);
+          ctx.ellipse(6, 0, 6, 11, -0.25, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 扫描游标线
+        const scanY = ((time * 28 + mode * 25) % h) - cy;
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-cx, scanY);
+        ctx.lineTo(cx, scanY);
+        ctx.stroke();
+
+        ctx.restore();
+      });
+    }
+
+    /********************************************************************
+     * 6. 移动端面板抽屉与右上角计时器控制
+     ********************************************************************/
+    const leftPanelEl = document.getElementById('left-panel');
+    const rightPanelEl = document.getElementById('right-panel');
+
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mobile-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.panel;
+        if (target === 'left') {
+          leftPanelEl.classList.remove('mobile-hidden');
+          rightPanelEl.classList.add('mobile-hidden');
+        } else if (target === 'right') {
+          rightPanelEl.classList.remove('mobile-hidden');
+          leftPanelEl.classList.add('mobile-hidden');
+        } else {
+          leftPanelEl.classList.add('mobile-hidden');
+          rightPanelEl.classList.add('mobile-hidden');
+        }
+      });
+    });
+
+    const timerReadoutEl = document.getElementById('timer-readout');
+    timerReadoutEl.addEventListener('click', () => {
+      isTimerPaused = !isTimerPaused;
+    });
+
+    /********************************************************************
+     * 7. 主渲染循环与窗口自适应
+     ********************************************************************/
+    initNavigationUI();
+    switchScene(4); // 初始化在 05 观察者阶段
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const elapsed = clock.getElapsedTime();
+
+      // 顶部计时器更新（保持默认 22.5s 起步，可点击暂停）
+      if (!isTimerPaused) {
+        traceSeconds = 22.5 + ((elapsed * 0.25) % 13.5);
+        timerReadoutEl.textContent = `${traceSeconds.toFixed(1)}s / 36s`;
+      }
+
+      // 3D 脑部微幅呼吸与神经电脉冲流动
+      rootGroup.rotation.y = Math.sin(elapsed * 0.45) * 0.08;
+      rootGroup.position.y = 0.16 + Math.sin(elapsed * 1.1) * 0.025;
+      orbitalDustGroup.rotation.y = elapsed * 0.08;
+
+      // 更新神经束上的动作电位光点坐标
+      const pulsePosAttr = pulsePointsMesh.geometry.attributes.position;
+      for (let i = 0; i < pulseParticlesData.length; i++) {
+        const item = pulseParticlesData[i];
+        item.t = (item.t + item.speed) % 1.0;
+        const pt = item.curve.getPoint(item.t);
+        pulsePosAttr.setXYZ(i, pt.x, pt.y, pt.z);
+      }
+      pulsePosAttr.needsUpdate = true;
+
+      // 脑区发光节点呼吸律动
+      Object.entries(regionNodes3D).forEach(([k, obj], idx) => {
+        const s = obj.baseScale + Math.sin(elapsed * 3.8 + idx) * 0.08;
+        obj.sprite.scale.set(s, s, 1);
+      });
+
+      // 相机平滑阻尼追踪
+      controls.update();
+
+      renderer.render(scene, camera);
+
+      // 更新 2D HUD 引线与所有实时子画布
+      updateHUDAndLeaderLines();
+      drawMiniHeadScan(elapsed);
+      drawOscilloscope(elapsed);
+      drawCalloutWaves(elapsed);
+      drawHoloStack(elapsed);
+      drawBrainScans(elapsed);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
