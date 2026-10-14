@@ -21,8 +21,9 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:56px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;transition:transform .2s,border-color .2s,box-shadow .2s}
   .card:hover{transform:translateY(-4px);border-color:var(--cyan);box-shadow:0 12px 32px rgba(6,182,212,.12)}
-  .thumb{display:block;border-radius:10px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border);aspect-ratio:16/8.4;background:#0b1220}
-  .thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+  .live{position:relative;container-type:inline-size;aspect-ratio:16/10;border-radius:10px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border);background:#0b1220 center top/cover no-repeat}
+  .live iframe{width:1280px;height:800px;border:0;display:block;transform:scale(calc(100cqw/1280px));transform-origin:top left;pointer-events:none;background:transparent}
+  .live-badge{position:absolute;top:8px;left:8px;z-index:2;font-size:10px;font-weight:800;letter-spacing:1.5px;color:#fff;background:rgba(239,68,68,.92);padding:3px 9px;border-radius:999px}
   .case-no{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--amber);margin-bottom:10px}
   .card h2{font-size:18px;line-height:1.5;margin-bottom:10px}
   .card p{color:var(--muted);font-size:13.5px;line-height:1.7;flex:1;margin-bottom:16px}
@@ -57,25 +58,25 @@
 
   <div class="grid">
     <div class="card">
-      <a class="thumb" href="./case-01/" target="_blank" rel="noopener"><img src="./previews/case-01.jpg" alt="case-01 预览" loading="lazy"></a><div class="case-no">CASE 01</div>
+      <div class="live" style="background-image:url('./previews/case-01.jpg')"><span class="live-badge">LIVE</span><iframe src="./case-01/" loading="lazy" title="自媒体从0到100万粉 实时预览"></iframe></div><div class="case-no">CASE 01</div>
       <h2>自媒体从 0 到 100 万粉完整打法 · 交互式 2D 动画图解</h2>
       <p>分幕式交互动画讲解：选题 / 钩子 / 节奏 / 复利。顶部步骤导航切换场景，支持自动巡演与键盘 ← → 切换，纯内联 SVG 动画、零外部依赖。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">交互式动画图解</span><span class="tag">2026-10-14</span></div>
-      <a class="btn" href="./case-01/" target="_blank" rel="noopener">查看案例 →</a>
+      <a class="btn" href="./case-01/" target="_blank" rel="noopener">查看更多 →</a>
     </div>
     <div class="card">
-      <a class="thumb" href="./case-02/" target="_blank" rel="noopener"><img src="./previews/case-02.jpg" alt="case-02 预览" loading="lazy"></a><div class="case-no">CASE 02</div>
+      <div class="live" style="background-image:url('./previews/case-02.jpg')"><span class="live-badge">LIVE</span><iframe src="./case-02/" loading="lazy" title="慢知识生产流程 实时预览"></iframe></div><div class="case-no">CASE 02</div>
       <h2>自媒体 90% 慢知识生产流程与议程设置 · 交互式 2D 动画全案</h2>
       <p>同系列第二弹：慢知识生产流程与议程设置的全案动画演示。分场景面板式讲解，同一套视觉语言，验证模型在系列化内容上的一致性。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">交互式动画图解</span><span class="tag">2026-10-14</span></div>
-      <a class="btn" href="./case-02/" target="_blank" rel="noopener">查看案例 →</a>
+      <a class="btn" href="./case-02/" target="_blank" rel="noopener">查看更多 →</a>
     </div>
     <div class="card">
-      <a class="thumb" href="./case-03/" target="_blank" rel="noopener"><img src="./previews/case-03.jpg" alt="case-03 预览" loading="lazy"></a><div class="case-no">CASE 03</div>
+      <div class="live" style="background-image:url('./previews/case-03.jpg')"><span class="live-badge">LIVE</span><iframe src="./case-03/" loading="lazy" title="鹈鹕单车奇遇记 实时预览"></iframe></div><div class="case-no">CASE 03</div>
       <h2>鹈鹕单车沿海奇遇记 · SVG 2D 动画</h2>
       <p>一只鹈鹕骑单车的沿海奇遇 SVG 动画故事。注：本页引用了 Tailwind CDN 与 Google Fonts，需联网加载，国内访问可能稍慢。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">SVG 动画故事</span><span class="tag">2026-10-14</span></div>
-      <a class="btn" href="./case-03/" target="_blank" rel="noopener">查看案例 →</a>
+      <a class="btn" href="./case-03/" target="_blank" rel="noopener">查看更多 →</a>
     </div>
   </div>
 
@@ -86,36 +87,61 @@
 
   <div class="grid">
     <div class="card">
-      <a class="thumb" href="./bench/unicorn-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-unicorn.jpg" alt="独角兽预览" loading="lazy"></a>
+      <div class="live" style="background-image:url('./previews/bench-unicorn.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/unicorn-4argon/" loading="lazy" title="SVG 独角兽 实时预览"></iframe></div>
       <div class="case-no">BENCH A</div>
       <h2>SVG 独角兽 · 梦幻星空主题</h2>
       <p>纯 SVG 手绘独角兽：鎏金角、幻彩鬃毛、星月光环、粒子与浮动闪烁动画，五套主题一键切换，点击触发生成魔法粒子。一次生成成功（38KB），经围栏重发 + 代码块下载取回完整文件。</p>
       <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">38KB</span></div>
-      <div class="btn-row"><a class="btn" href="./bench/unicorn-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/unicorn-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+      <div class="btn-row"><a class="btn" href="./bench/unicorn-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/unicorn-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
     </div>
     <div class="card">
-      <a class="thumb" href="./bench/snake-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-snake.jpg" alt="贪吃蛇预览" loading="lazy"></a>
+      <div class="live" style="background-image:url('./previews/bench-snake.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/snake-4argon/" loading="lazy" title="贪吃蛇 实时预览"></iframe></div>
       <div class="case-no">BENCH B</div>
       <h2>贪吃蛇小游戏</h2>
       <p>20×20 网格：计分、localStorage 最高分、开始/暂停/重开、结算面板、键盘 WASD + 触屏滑动、速度递增。前两次被单次输出长度截断，第三次加精简要求后一次成功（12KB）。</p>
       <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">12KB</span></div>
-      <div class="btn-row"><a class="btn" href="./bench/snake-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/snake-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+      <div class="btn-row"><a class="btn" href="./bench/snake-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/snake-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
     </div>
     <div class="card">
-      <a class="thumb" href="./bench/dashboard-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-dashboard.jpg" alt="仪表盘预览" loading="lazy"></a>
+      <div class="live" style="background-image:url('./previews/bench-dashboard.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/dashboard-4argon/" loading="lazy" title="健康仪表盘 实时预览"></iframe></div>
       <div class="case-no">BENCH C</div>
       <h2>个人健康数据仪表盘</h2>
       <p>深色科技风：4 张数据卡片 + 7 天步数柱状图 + 本周运动时长环形图 + 睡眠监测，全部原生 SVG/JS 手写。前三次因复制提取截断失败，第四次用围栏 + 下载按钮一次成功（46KB）。失败记录如实保留在测试记录中。</p>
       <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">第四次成功</span><span class="tag">46KB</span></div>
-      <div class="btn-row"><a class="btn" href="./bench/dashboard-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/dashboard-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+      <div class="btn-row"><a class="btn" href="./bench/dashboard-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/dashboard-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
     </div>
     <div class="card">
-      <a class="thumb" href="./bench/landing-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-landing.jpg" alt="MemoInk 落地页预览" loading="lazy"></a>
+      <div class="live" style="background-image:url('./previews/bench-landing.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/landing-4argon/" loading="lazy" title="MemoInk 落地页 实时预览"></iframe></div>
       <div class="case-no">BENCH D</div>
       <h2>「墨迹 MemoInk」AI 笔记产品落地页</h2>
       <p>导航栏 / hero / 三张特性卡片 / 三档价格 / 页脚 / 微交互（弹窗、Toast）。简洁提示词 + 代码块下载按钮，一次成功（95KB，零外部依赖）。此前"30KB 截断"实为复制提取路径的问题，而非模型输出上限。</p>
       <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">95KB</span></div>
-      <div class="btn-row"><a class="btn" href="./bench/landing-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/landing-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+      <div class="btn-row"><a class="btn" href="./bench/landing-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/landing-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
+    <div class="card">
+      <div class="live" style="background-image:url('./previews/bench-tetris.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/tetris-4argon/" loading="lazy" title="俄罗斯方块 实时预览"></iframe></div>
+      <div class="case-no">BENCH E</div>
+      <h2>俄罗斯方块 · 经典街机版</h2>
+      <p>7 种方块、7-Bag 随机发牌、墙踢、幽灵块预览、消行计分、等级加速、localStorage 最高分、暂停/重开。一次成功（25KB）。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">25KB</span></div>
+      <div class="btn-row"><a class="btn" href="./bench/tetris-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/tetris-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
+    <div class="card">
+      <div class="live" style="background-image:url('./previews/bench-threebody.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/threebody-4argon/" loading="lazy" title="三体模拟 实时预览"></iframe></div>
+      <div class="case-no">BENCH F</div>
+      <h2>三体运动引力模拟系统</h2>
+      <p>三天体引力轨道数值模拟（RK4 高精度积分）、Canvas 实时渲染、轨迹尾迹、质量/位置/速度滑杆可调、经典轨道预设（8字形等）、暂停/重置。一次成功（51KB）。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">51KB</span></div>
+      <div class="btn-row"><a class="btn" href="./bench/threebody-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/threebody-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
+    <div class="card">
+      <div class="live" style="background-image:url('./previews/bench-maze.jpg')"><span class="live-badge">LIVE</span><iframe src="./bench/maze-4argon/" loading="lazy" title="迷宫游戏 实时预览"></iframe></div>
+      <div class="case-no">BENCH G</div>
+      <h2>极光迷城 · 随机迷宫闯关</h2>
+      <p>迭代 DFS 随机迷宫生成、BFS 寻路、WASD/方向键 + 触屏操作、计时计分、4 档难度、战争迷雾、localStorage 最高分、Web Audio 音效。一次成功（41KB）。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">41KB</span></div>
+      <div class="btn-row"><a class="btn" href="./bench/maze-4argon/" target="_blank" rel="noopener">查看更多 →</a><a class="btn ghost" href="./bench/maze-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
     </div>
   </div>
 
