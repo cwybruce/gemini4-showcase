@@ -1,8 +1,8 @@
-# 任务 H（已替换）：CONSCIOUSNESS OS / 3D 神经重塑交互系统 — 展示记录
+# 任务 J：CONSCIOUSNESS OS / 3D 神经重塑交互系统 — 展示记录
 
-## 说明（2026-10-14 用户要求替换）
+## 说明
 
-本槽位原为"肝脏 3D 科普"（Gemini 4 一次生成，112KB），用户于 2026-10-14 要求换成这一组（CONSCIOUSNESS OS 页面 + 大脑参考图）。肝脏原文件仍在 git 历史中（`bench/liver-4argon/`，commit d27dd16 之前），可随时恢复。
+用户于 2026-10-14 上传这一组（CONSCIOUSNESS OS 页面 + 大脑参考图），起初要求替换肝脏案例；随后用户表示肝脏没看到，故肝脏恢复为 BENCH H，本组改为 BENCH J，两组并存。
 
 ## 本文件来源
 
