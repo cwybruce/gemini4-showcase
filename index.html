@@ -21,6 +21,8 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-bottom:56px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;transition:transform .2s,border-color .2s,box-shadow .2s}
   .card:hover{transform:translateY(-4px);border-color:var(--cyan);box-shadow:0 12px 32px rgba(6,182,212,.12)}
+  .thumb{display:block;border-radius:10px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border);aspect-ratio:16/8.4;background:#0b1220}
+  .thumb img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
   .case-no{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--amber);margin-bottom:10px}
   .card h2{font-size:18px;line-height:1.5;margin-bottom:10px}
   .card p{color:var(--muted);font-size:13.5px;line-height:1.7;flex:1;margin-bottom:16px}
@@ -48,21 +50,21 @@
 
   <div class="grid">
     <div class="card">
-      <div class="case-no">CASE 01</div>
+      <a class="thumb" href="./case-01/" target="_blank" rel="noopener"><img src="./previews/case-01.jpg" alt="case-01 预览" loading="lazy"></a><div class="case-no">CASE 01</div>
       <h2>自媒体从 0 到 100 万粉完整打法 · 交互式 2D 动画图解</h2>
       <p>分幕式交互动画讲解：选题 / 钩子 / 节奏 / 复利。顶部步骤导航切换场景，支持自动巡演与键盘 ← → 切换，纯内联 SVG 动画、零外部依赖。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">交互式动画图解</span><span class="tag">2026-10-14</span></div>
       <a class="btn" href="./case-01/" target="_blank" rel="noopener">查看案例 →</a>
     </div>
     <div class="card">
-      <div class="case-no">CASE 02</div>
+      <a class="thumb" href="./case-02/" target="_blank" rel="noopener"><img src="./previews/case-02.jpg" alt="case-02 预览" loading="lazy"></a><div class="case-no">CASE 02</div>
       <h2>自媒体 90% 慢知识生产流程与议程设置 · 交互式 2D 动画全案</h2>
       <p>同系列第二弹：慢知识生产流程与议程设置的全案动画演示。分场景面板式讲解，同一套视觉语言，验证模型在系列化内容上的一致性。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">交互式动画图解</span><span class="tag">2026-10-14</span></div>
       <a class="btn" href="./case-02/" target="_blank" rel="noopener">查看案例 →</a>
     </div>
     <div class="card">
-      <div class="case-no">CASE 03</div>
+      <a class="thumb" href="./case-03/" target="_blank" rel="noopener"><img src="./previews/case-03.jpg" alt="case-03 预览" loading="lazy"></a><div class="case-no">CASE 03</div>
       <h2>鹈鹕单车沿海奇遇记 · SVG 2D 动画</h2>
       <p>一只鹈鹕骑单车的沿海奇遇 SVG 动画故事。注：本页引用了 Tailwind CDN 与 Google Fonts，需联网加载，国内访问可能稍慢。</p>
       <div class="tags"><span class="tag model">Gemini 生成</span><span class="tag">SVG 动画故事</span><span class="tag">2026-10-14</span></div>
