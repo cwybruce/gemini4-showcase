@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>星梦独角兽 · 幻彩矢量艺术</title>
+<style>
+  :root {
+    --bg-top: #070514;
+    --bg-mid: #110b29;
+    --bg-bot: #1b1035;
+    --accent: #f9c87c;
+    --accent-glow: rgba(249, 200, 124, 0.45);
+    --panel-bg: rgba(20, 14, 42, 0.65);
+    --panel-border: rgba(255, 255, 255, 0.14);
+    --text-main: #f3eeff;
+    --text-sub: rgba(243, 238, 255, 0.65);
+    --anim-play: running;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 42%, var(--bg-mid) 0%, var(--bg-top) 60%, #030208 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .header-bar {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .header-title {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    background: linear-gradient(90deg, #ffe6b8, #ff9ce3, #8aecff, #ffe6b8);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shineText 6s linear infinite;
+    animation-play-state: var(--anim-play);
+    text-shadow: 0 0 24px rgba(255, 180, 255, 0.25);
+  }
+
+  .header-sub {
+    font-size: clamp(0.72rem, 1.5vw, 0.82rem);
+    color: var(--text-sub);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+
+  @keyframes shineText {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .stage-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 40px 16px 84px;
+  }
+
+  svg#unicorn-art {
+    width: 100%;
+    height: 100%;
+    max-width: 920px;
+    max-height: 820px;
+    overflow: visible;
+    filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.6));
+    cursor: pointer;
+  }
+
+  /* 独角兽主体悬浮动画 */
+  .unicorn-float-group {
+    animation: floatUnicorn 5.5s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 500px 500px;
+  }
+
+  @keyframes floatUnicorn {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-18px) rotate(-0.8deg); }
+  }
+
+  /* 鬃毛与尾巴轻柔飘动 */
+  .mane-wave-1 {
+    animation: swayMane 4.2s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 560px 310px;
+  }
+  .mane-wave-2 {
+    animation: swayMane 3.6s ease-in-out infinite reverse;
+    animation-play-state: var(--anim-play);
+    transform-origin: 520px 380px;
+  }
+  .tail-wave {
+    animation: swayTail 4.8s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 345px 525px;
+  }
+
+  @keyframes swayMane {
+    0%, 100% { transform: rotate(0deg) skewX(0deg); }
+    50% { transform: rotate(2.4deg) skewX(-2deg); }
+  }
+
+  @keyframes swayTail {
+    0%, 100% { transform: rotate(0deg) scaleY(1); }
+    50% { transform: rotate(-3.8deg) scaleY(1.02); }
+  }
+
+  /* 法阵旋转 */
+  .halo-rotate-cw {
+    animation: spinCW 48s linear infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 500px 440px;
+  }
+  .halo-rotate-ccw {
+    animation: spinCCW 36s linear infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 500px 440px;
+  }
+
+  @keyframes spinCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes spinCCW {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+  }
+
+  /* 圣角脉冲星芒 */
+  .horn-pulse {
+    animation: hornGlow 2.8s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+    transform-origin: 736px 136px;
+  }
+
+  @keyframes hornGlow {
+    0%, 100% { transform: scale(0.92) rotate(0deg); opacity: 0.82; }
+    50% { transform: scale(1.18) rotate(15deg); opacity: 1; }
+  }
+
+  /* 星辰闪烁 */
+  .star-twinkle {
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    animation-play-state: var(--anim-play);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.65); }
+    50% { opacity: 1; transform: scale(1.25); }
+  }
+
+  /* 云层呼吸浮动 */
+  .cloud-drift-left {
+    animation: cloudDriftL 7s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+  }
+  .cloud-drift-right {
+    animation: cloudDriftR 8.5s ease-in-out infinite;
+    animation-play-state: var(--anim-play);
+  }
+
+  @keyframes cloudDriftL {
+    0%, 100% { transform: translateX(0px); }
+    50% { transform: translateX(-14px); }
+  }
+  @keyframes cloudDriftR {
+    0%, 100% { transform: translateX(0px); }
+    50% { transform: translateX(14px); }
+  }
+
+  /* 流光粒子上升 */
+  .magic-orb {
+    animation: riseOrb var(--dur, 5s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    animation-play-state: var(--anim-play);
+  }
+
+  @keyframes riseOrb {
+    0% { transform: translateY(15px) scale(0.6); opacity: 0; }
+    40% { opacity: 0.9; }
+    100% { transform: translateY(-55px) scale(1.1); opacity: 0; }
+  }
+
+  /* 底部控制栏 */
+  .control-dock {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(155, 100, 255, 0.15);
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: calc(100vw - 24px);
+  }
+
+  .ctrl-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    font-size: 0.82rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .ctrl-btn.active {
+    background: linear-gradient(135deg, rgba(255, 148, 226, 0.35), rgba(124, 185, 255, 0.35));
+    border-color: rgba(255, 215, 150, 0.65);
+    box-shadow: 0 0 14px rgba(255, 180, 235, 0.35);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .dot-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 2px;
+  }
+
+  @media (max-width: 600px) {
+    .header-bar { top: 14px; }
+    .stage-container { padding: 36px 6px 86px; }
+    .control-dock {
+      padding: 6px 10px;
+      gap: 6px;
+      bottom: 14px;
+    }
+    .ctrl-btn {
+      font-size: 0.75rem;
+      padding: 5px 10px;
+    }
+    .divider { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="header-bar">
+    <h1 class="header-title">星梦独角兽</h1>
+    <p class="header-sub">轻触独角兽唤醒星辰祝福 · 切换主题探索幻彩灵境</p>
+  </header>
+
+  <main class="stage-container">
+    <svg id="unicorn-art" viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg" aria-label="幻彩星梦独角兽矢量插画">
+      <defs>
+        <!-- 柔光滤镜 -->
+        <filter id="glow-soft" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="12" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+
+        <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="blur1" />
+          <feGaussianBlur stdDeviation="20" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+
+        <!-- 背景星云径向渐变 -->
+        <radialGradient id="nebula-main" cx="50%" cy="46%" r="48%">
+          <stop id="neb-s1" offset="0%" stop-color="#6b3fa0" stop-opacity="0.42" />
+          <stop id="neb-s2" offset="45%" stop-color="#331c6e" stop-opacity="0.22" />
+          <stop offset="100%" stop-color="#070514" stop-opacity="0" />
+        </radialGradient>
+
+        <radialGradient id="nebula-sec" cx="62%" cy="34%" r="36%">
+          <stop id="neb2-s1" offset="0%" stop-color="#ff6ec7" stop-opacity="0.25" />
+          <stop id="neb2-s2" offset="60%" stop-color="#4589ff" stop-opacity="0.1" />
+          <stop offset="100%" stop-color="#070514" stop-opacity="0" />
+        </radialGradient>
+
+        <!-- 独角兽躯干珠光渐变 -->
+        <linearGradient id="body-grad" x1="25%" y1="10%" x2="78%" y2="90%">
+          <stop id="body-s1" offset="0%" stop-color="#ffffff" />
+          <stop id="body-s2" offset="45%" stop-color="#f3ecff" />
+          <stop id="body-s3" offset="80%" stop-color="#d5c2f7" />
+          <stop id="body-s4" offset="100%" stop-color="#a58be0" />
+        </linearGradient>
+
+        <!-- 远侧腿部深色阴影渐变 -->
+        <linearGradient id="far-leg-grad" x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop id="fleg-s1" offset="0%" stop-color="#cbb8f0" />
+          <stop id="fleg-s2" offset="55%" stop-color="#9e82d6" />
+          <stop id="fleg-s3" offset="100%" stop-color="#6e50ad" />
+        </linearGradient>
+
+        <!-- 躯干边缘高光与腹部柔光 -->
+        <linearGradient id="belly-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+          <stop offset="50%" stop-color="#ffd6f6" stop-opacity="0.35" />
+          <stop offset="100%" stop-color="#9bf6ff" stop-opacity="0.7" />
+        </linearGradient>
+
+        <!-- 鬃毛与尾巴幻彩渐变 A（主色调） -->
+        <linearGradient id="mane-grad-a" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop id="ma-s1" offset="0%" stop-color="#ff94e8" />
+          <stop id="ma-s2" offset="38%" stop-color="#b57cff" />
+          <stop id="ma-s3" offset="75%" stop-color="#5ce1e6" />
+          <stop id="ma-s4" offset="100%" stop-color="#ffe999" />
+        </linearGradient>
+
+        <!-- 鬃毛与尾巴幻彩渐变 B（深层交替） -->
+        <linearGradient id="mane-grad-b" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop id="mb-s1" offset="0%" stop-color="#ffd670" />
+          <stop id="mb-s2" offset="30%" stop-color="#ff65b3" />
+          <stop id="mb-s3" offset="70%" stop-color="#7b52ff" />
+          <stop id="mb-s4" offset="100%" stop-color="#38b6ff" />
+        </linearGradient>
+
+        <!-- 鬃毛与尾巴幻彩渐变 C（高光丝缕） -->
+        <linearGradient id="mane-grad-c" x1="0%" y1="20%" x2="100%" y2="80%">
+          <stop id="mc-s1" offset="0%" stop-color="#ffffff" />
+          <stop id="mc-s2" offset="45%" stop-color="#ffb8f0" />
+          <stop id="mc-s3" offset="100%" stop-color="#80ffea" />
+        </linearGradient>
+
+        <!-- 螺旋圣角鎏金渐变 -->
+        <linearGradient id="horn-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#e3963e" />
+          <stop offset="35%" stop-color="#ffe18d" />
+          <stop offset="70%" stop-color="#fff8db" />
+          <stop offset="100%" stop-color="#ffffff" />
+        </linearGradient>
+
+        <!-- 黄金蹄与装饰渐变 -->
+        <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fff4c7" />
+          <stop offset="45%" stop-color="#ffd166" />
+          <stop offset="100%" stop-color="#c98427" />
+        </linearGradient>
+
+        <!-- 耳廓内部粉紫渐变 -->
+        <linearGradient id="ear-inner" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffc2e8" />
+          <stop offset="100%" stop-color="#9d6bff" />
+        </linearGradient>
+
+        <!-- 梦幻云层渐变 -->
+        <linearGradient id="cloud-grad-1" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22" />
+          <stop offset="45%" stop-color="#b892ff" stop-opacity="0.14" />
+          <stop offset="100%" stop-color="#190e36" stop-opacity="0.02" />
+        </linearGradient>
+
+        <linearGradient id="cloud-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fface8" stop-opacity="0.28" />
+          <stop offset="50%" stop-color="#7f7eff" stop-opacity="0.16" />
+          <stop offset="100%" stop-color="#110926" stop-opacity="0" />
+        </linearGradient>
+
+        <!-- 四芒星复用图形 -->
+        <g id="sparkle-star">
+          <path d="M 0,-12 C 1,-3 3,-1 12,0 C 3,1 1,3 0,12 C -1,3 -3,1 -12,0 C -3,-1 -1,-3 0,-12 Z" fill="#ffffff" />
+          <circle cx="0" cy="0" r="2.5" fill="#fff6cc" />
+        </g>
+
+        <!-- 八芒星复用图形 -->
+        <g id="sparkle-8">
+          <path d="M 0,-18 C 1.2,-4 4,-1.2 18,0 C 4,1.2 1.2,4 0,18 C -1.2,4 -4,1.2 -18,0 C -4,-1.2 -1.2,-4 0,-18 Z" fill="#fff9e6" />
+          <path d="M -9,-9 C -2,-3 -3,-2 0,0 C 3,-2 2,-3 9,-9 C 3,-2 2,-3 0,0 C 2,3 3,2 9,9 C 2,3 3,2 0,0 C -3,2 -2,3 -9,9 C -2,3 -3,2 0,0 Z" fill="#ffd97d" opacity="0.85" />
+          <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
+        </g>
+      </defs>
+
+      <!-- ================= 1. 宇宙深空背景与星云 ================= -->
+      <g id="background-cosmos">
+        <ellipse cx="500" cy="430" rx="460" ry="380" fill="url(#nebula-main)" />
+        <ellipse cx="580" cy="340" rx="340" ry="270" fill="url(#nebula-sec)" />
+
+        <!-- 星座连线装饰 -->
+        <g id="constellation-lines" stroke="url(#gold-grad)" stroke-width="0.8" opacity="0.32" fill="none">
+          <polyline points="140,220 195,180 255,205 290,145 355,165" stroke-dasharray="3 4" />
+          <circle cx="140" cy="220" r="2.5" fill="#ffe8a3" />
+          <circle cx="195" cy="180" r="3" fill="#ffffff" />
+          <circle cx="255" cy="205" r="2" fill="#ffe8a3" />
+          <circle cx="290" cy="145" r="3.5" fill="#ffffff" />
+          <circle cx="355" cy="165" r="2" fill="#ffe8a3" />
+
+          <polyline points="780,250 845,210 875,270 830,330 765,310 780,250" stroke-dasharray="3 4" />
+          <circle cx="780" cy="250" r="3" fill="#ffffff" />
+          <circle cx="845" cy="210" r="2.5" fill="#ffe8a3" />
+          <circle cx="875" cy="270" r="3" fill="#ffffff" />
+          <circle cx="830" cy="330" r="2" fill="#ffe8a3" />
+          <circle cx="765" cy="310" r="2.5" fill="#ffe8a3" />
+        </g>
+
+        <!-- 背景繁星层 -->
+        <g id="bg-stars">
+          <use href="#sparkle-star" x="150" y="130" transform="scale(0.7)" class="star-twinkle" style="--dur: 3.2s; --delay: 0.2s;" />
+          <use href="#sparkle-star" x="840" y="135" transform="scale(0.85)" class="star-twinkle" style="--dur: 4.1s; --delay: 1.1s;" />
+          <use href="#sparkle-star" x="120" y="420" transform="scale(0.65)" class="star-twinkle" style="--dur: 2.8s; --delay: 0.7s;" />
+          <use href="#sparkle-star" x="880" y="460" transform="scale(0.75)" class="star-twinkle" style="--dur: 3.6s; --delay: 1.8s;" />
+          <use href="#sparkle-star" x="230" y="310" transform="scale(0.55)" class="star-twinkle" style="--dur: 4.5s; --delay: 0.4s;" />
+          <use href="#sparkle-star" x="640" y="105" transform="scale(0.6)" class="star-twinkle" style="--dur: 3.0s; --delay: 2.1s;" />
+          <use href="#sparkle-8" x="210" y="185" transform="scale(0.7)" class="star-twinkle" style="--dur: 5.0s; --delay: 0.9s;" />
+          <use href="#sparkle-8" x="820" y="380" transform="scale(0.65)" class="star-twinkle" style="--dur: 4.3s; --delay: 1.5s;" />
+          <!-- 微小星尘点 -->
+          <circle cx="310" cy="95" r="1.5" fill="#fff" opacity="0.6" />
+          <circle cx="440" cy="80" r="2" fill="#ffd6ff" opacity="0.7" />
+          <circle cx="730" cy="195" r="1.5" fill="#fff" opacity="0.5" />
+          <circle cx="165" cy="560" r="2" fill="#9bf6ff" opacity="0.6" />
+          <circle cx="845" cy="590" r="1.8" fill="#ffd6a5" opacity="0.6" />
+          <circle cx="280" cy="660" r="1.4" fill="#fff" opacity="0.4" />
+        </g>
+      </g>
+
+      <!-- ================= 2. 神圣星月光环法阵 ================= -->
+      <g id="sacred-halo">
+        <!-- 外圈逆时针星轨 -->
+        <g class="halo-rotate-ccw" opacity="0.42">
+          <circle cx="500" cy="440" r="285" fill="none" stroke="url(#gold-grad)" stroke-width="1.2" stroke-dasharray="8 12 2 12" />
+          <circle cx="500" cy="440" r="268" fill="none" stroke="url(#mane-grad-a)" stroke-width="0.8" opacity="0.7" />
+          <!-- 轨道上的八角几何与星点 -->
+          <polygon points="500,155 568,372 785,440 568,508 500,725 432,508 215,440 432,372" fill="none" stroke="url(#gold-grad)" stroke-width="0.6" opacity="0.45" />
+          <circle cx="500" cy="155" r="4" fill="#ffe6a3" />
+          <circle cx="500" cy="725" r="4" fill="#ffe6a3" />
+          <circle cx="215" cy="440" r="4" fill="#ffe6a3" />
+          <circle cx="785" cy="440" r="4" fill="#ffe6a3" />
+        </g>
+
+        <!-- 内圈顺时针星轨 -->
+        <g class="halo-rotate-cw" opacity="0.55">
+          <circle cx="500" cy="440" r="230" fill="none" stroke="url(#gold-grad)" stroke-width="1.5" stroke-dasharray="1 10" stroke-linecap="round" />
+          <rect x="338" y="278" width="324" height="324" fill="none" stroke="url(#gold-grad)" stroke-width="0.7" opacity="0.4" transform="rotate(45 500 440)" />
+          <rect x="338" y="278" width="324" height="324" fill="none" stroke="url(#gold-grad)" stroke-width="0.7" opacity="0.4" />
+        </g>
+
+        <!-- 新月背光 -->
+        <path d="M 355,245 A 215,215 0 1,0 665,610 A 195,195 0 1,1 355,245 Z" fill="url(#gold-grad)" opacity="0.18" filter="url(#glow-soft)" />
+      </g>
+
+      <!-- ================= 3. 远景云雾层 ================= -->
+      <g class="cloud-drift-left">
+        <path d="M 140,715 Q 200,650 285,680 Q 350,620 445,655 Q 535,605 625,660 Q 715,625 785,675 Q 855,665 880,715 Z" fill="url(#cloud-grad-1)" />
+      </g>
+
+      <!-- ================= 4. 独角兽主体（带悬浮动画） ================= -->
+      <g class="unicorn-float-group" id="unicorn-character">
+
+        <!-- 4.1 飘逸长尾（分层渐变与丝缕高光） -->
+        <g class="tail-wave" id="unicorn-tail">
+          <!-- 底层深色尾羽 -->
+          <path d="M 350,515 C 265,495 175,550 135,635 C 105,695 135,765 75,795 C 155,795 225,745 255,675 C 285,610 315,575 358,545 Z" fill="url(#mane-grad-b)" filter="url(#glow-soft)" />
+          <!-- 中层丰盈主尾羽 -->
+          <path d="M 355,502 C 255,470 155,525 110,610 C 80,668 92,728 48,750 C 135,748 195,695 230,625 C 260,565 305,548 362,532 Z" fill="url(#mane-grad-a)" />
+          <!-- 上层灵动卷曲尾羽 -->
+          <path d="M 358,495 C 285,455 195,475 150,538 C 118,582 110,632 68,645 C 135,645 182,605 215,558 C 252,508 308,505 360,518 Z" fill="url(#mane-grad-c)" opacity="0.88" />
+          <!-- 尾部发光金丝线 -->
+          <path d="M 355,508 C 265,478 168,528 122,618 C 95,672 102,725 62,746" fill="none" stroke="url(#gold-grad)" stroke-width="2.2" stroke-linecap="round" opacity="0.85" />
+          <path d="M 352,522 C 275,505 195,558 158,642 C 132,700 140,752 92,782" fill="none" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.7" />
+        </g>
+
+        <!-- 4.2 远侧双腿（左后腿与左前腿，处于阴影层） -->
+        <g id="far-legs">
+          <!-- 远侧后腿（支撑微曲） -->
+          <path d="M 378,545 C 362,595 335,635 318,668 C 308,688 316,725 304,768 C 299,785 288,798 286,808 L 318,808 C 322,792 326,772 332,745 C 340,710 342,688 358,662 C 382,625 415,585 428,545 Z" fill="url(#far-leg-grad)" />
+          <!-- 远侧后黄金蹄 -->
+          <path d="M 292,786 L 320,786 L 318,808 L 284,808 C 284,798 288,792 292,786 Z" fill="url(#gold-grad)" />
+
+          <!-- 远侧前腿（优雅凌空折起） -->
+          <path d="M 578,528 C 618,548 662,578 672,612 C 680,638 648,678 622,702 C 610,712 595,716 588,724 L 572,704 C 584,692 602,680 618,660 C 635,638 644,622 636,605 C 626,584 585,568 556,552 Z" fill="url(#far-leg-grad)" />
+          <!-- 远侧前黄金蹄 -->
+          <path d="M 598,686 L 614,706 L 588,724 L 570,704 Z" fill="url(#gold-grad)" />
+        </g>
+
+        <!-- 4.3 后段深层鬃毛（脖子后方衬底） -->
+        <g class="mane-wave-2" id="mane-back-layer">
+          <path d="M 588,262 C 510,248 438,288 402,352 C 378,395 362,425 322,435 C 382,445 438,412 472,368 C 505,325 548,308 585,305 Z" fill="url(#mane-grad-b)" />
+          <path d="M 562,332 C 482,325 415,368 382,432 C 362,470 342,495 305,502 C 368,512 425,482 458,438 C 488,398 525,382 558,378 Z" fill="url(#mane-grad-a)" />
+        </g>
+
+        <!-- 4.4 独角兽核心躯干、天鹅颈与头部、近侧双腿 -->
+        <g id="unicorn-body-core">
+          <!-- 主躯干 + 颈部 + 头部 + 近侧后腿 一气呵成流畅曲线 -->
+          <path d="
+            M 618,242
+            C 645,232 678,248 708,272
+            C 728,288 746,302 742,318
+            C 738,332 718,342 698,338
+            C 672,334 650,318 632,308
+            C 618,348 612,402 622,455
+            C 632,505 622,552 585,575
+            C 542,602 482,582 438,572
+            C 425,608 398,648 378,682
+            C 365,704 372,748 366,792
+            C 364,805 360,818 358,826
+            L 326,826
+            C 328,808 334,782 338,752
+            C 344,712 334,685 348,660
+            C 365,630 378,602 368,568
+            C 338,542 325,498 345,460
+            C 365,422 418,425 478,432
+            C 528,438 548,392 562,338
+            C 575,288 592,252 618,242 Z
+          " fill="url(#body-grad)" stroke="url(#belly-rim)" stroke-width="1.8" />
+
+          <!-- 近侧前腿（修长优雅前伸） -->
+          <path d="
+            M 565,525
+            C 588,535 612,568 625,612
+            C 638,655 662,712 682,765
+            C 688,782 695,796 698,808
+            L 664,808
+            C 656,788 645,758 632,720
+            C 615,672 595,635 572,598
+            C 555,570 545,545 565,525 Z
+          " fill="url(#body-grad)" stroke="url(#belly-rim)" stroke-width="1.5" />
+
+          <!-- 近侧后黄金蹄与护踝长毛 -->
+          <path d="M 332,800 L 362,800 L 358,826 L 324,826 C 325,814 328,806 332,800 Z" fill="url(#gold-grad)" />
+          <path d="M 334,782 C 325,792 318,798 310,802 C 324,804 342,802 362,798 C 358,790 348,785 334,782 Z" fill="#ffffff" opacity="0.9" />
+
+          <!-- 近侧前黄金蹄与护踝长毛 -->
+          <path d="M 656,784 L 688,784 L 698,808 L 662,808 Z" fill="url(#gold-grad)" />
+          <path d="M 648,768 C 642,778 635,786 626,790 C 645,792 668,788 688,784 C 678,775 664,770 648,768 Z" fill="#ffffff" opacity="0.9" />
+
+          <!-- 臀部与肩部神圣鎏金星纹烙印 -->
+          <g opacity="0.82" fill="url(#gold-grad)">
+            <!-- 臀部星月印记 -->
+            <path d="M 392,475 A 22,22 0 1,0 422,505 A 18,18 0 1,1 392,475 Z" />
+            <path d="M 418,472 C 419,465 421,463 428,462 C 421,461 419,459 418,452 C 417,459 415,461 408,462 C 415,463 417,465 418,472 Z" />
+            <circle cx="382" cy="512" r="2.5" />
+            <circle cx="432" cy="492" r="2" />
+            <!-- 肩部流光弧线 -->
+            <path d="M 558,485 C 575,502 595,505 612,492" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" />
+            <circle cx="585" cy="512" r="2.5" />
+          </g>
+
+          <!-- 远侧耳朵（后耳） -->
+          <path d="M 622,244 C 618,215 628,192 642,182 C 648,198 646,222 636,244 Z" fill="url(#far-leg-grad)" />
+
+          <!-- 近侧耳朵（前耳，带粉紫内耳廓） -->
+          <path d="M 604,250 C 590,218 598,188 615,175 C 626,195 626,225 618,248 Z" fill="url(#body-grad)" stroke="#ffffff" stroke-width="1.2" />
+          <path d="M 608,242 C 598,218 603,196 614,185 C 620,200 620,222 614,240 Z" fill="url(#ear-inner)" opacity="0.85" />
+
+          <!-- 面部细节：温柔闭合的眼睑与黄金长睫毛、鼻翼、浅粉腮红 -->
+          <ellipse cx="668" cy="288" rx="16" ry="9" fill="#ff9ebb" opacity="0.32" filter="url(#glow-soft)" />
+          <!-- 眼线与长睫毛 -->
+          <path d="M 642,268 C 652,276 666,276 675,266" fill="none" stroke="#4a2c7a" stroke-width="2.6" stroke-linecap="round" />
+          <path d="M 644,269 C 653,277 666,277 675,267" fill="none" stroke="url(#gold-grad)" stroke-width="1.2" stroke-linecap="round" />
+          <path d="M 652,273 L 648,281 M 660,275 L 659,284 M 668,273 L 671,281 M 674,268 L 680,274" stroke="url(#gold-grad)" stroke-width="1.6" stroke-linecap="round" />
+          <!-- 眼上方神圣高光点 -->
+          <circle cx="658" cy="258" r="2" fill="url(#gold-grad)" />
+          <!-- 精致鼻孔与唇线 -->
+          <path d="M 726,306 C 722,302 716,304 715,309" fill="none" stroke="#7c5bad" stroke-width="2" stroke-linecap="round" />
+          <path d="M 736,322 C 724,324 714,320 708,315" fill="none" stroke="#7c5bad" stroke-width="1.6" stroke-linecap="round" />
+        </g>
+
+        <!-- 4.5 螺旋鎏金圣角（Alacorn）与角尖星芒 -->
+        <g id="unicorn-horn">
+          <!-- 圣角外发光衬底 -->
+          <path d="M 642,242 L 740,132 L 658,256 Z" fill="#ffe999" opacity="0.45" filter="url(#glow-strong)" />
+          <!-- 圣角主体 -->
+          <path d="
+            M 640,242
+            C 668,208 708,165 738,134
+            C 741,131 744,134 741,137
+            C 712,172 678,218 656,256
+            C 648,254 642,249 640,242 Z
+          " fill="url(#horn-grad)" stroke="#ffffff" stroke-width="1" />
+          <!-- 圣角螺旋凹槽纹理 -->
+          <path d="
+            M 645,248 Q 658,242 666,232
+            M 662,226 Q 674,220 682,210
+            M 680,204 Q 691,198 698,188
+            M 698,182 Q 708,176 714,166
+            M 716,160 Q 724,155 729,146
+          " fill="none" stroke="#c98427" stroke-width="1.8" stroke-linecap="round" opacity="0.75" />
+          <!-- 圣角尖端脉冲星芒 -->
+          <g class="horn-pulse">
+            <circle cx="739" cy="135" r="22" fill="#ffe89e" opacity="0.35" filter="url(#glow-soft)" />
+            <use href="#sparkle-8" x="739" y="135" transform="scale(1.25)" />
+          </g>
+        </g>
+
+        <!-- 4.6 前景华丽流光鬃毛（覆盖颈侧与额前刘海） -->
+        <g class="mane-wave-1" id="mane-front-layer">
+          <!-- 额前微卷星云刘海 -->
+          <path d="M 632,238 C 655,205 695,202 718,225 C 692,225 668,235 648,252 Z" fill="url(#mane-grad-c)" />
+          <path d="M 615,242 C 585,205 530,208 495,242 C 538,235 575,248 602,268 Z" fill="url(#mane-grad-a)" />
+
+          <!-- 第一缕主鬃毛（上层） -->
+          <path d="M 605,258 C 535,235 458,268 418,328 C 392,368 368,388 332,392 C 395,408 455,375 492,332 C 525,292 565,285 598,288 Z" fill="url(#mane-grad-a)" />
+
+          <!-- 第二缕主鬃毛（中层） -->
+          <path d="M 592,298 C 518,282 448,325 415,388 C 392,432 365,455 328,460 C 392,472 448,438 482,392 C 512,352 552,335 582,335 Z" fill="url(#mane-grad-c)" opacity="0.92" />
+
+          <!-- 第三缕主鬃毛（下层肩侧） -->
+          <path d="M 575,355 C 508,348 448,388 422,448 C 405,488 382,512 348,518 C 408,525 458,492 488,448 C 515,408 545,392 568,392 Z" fill="url(#mane-grad-b)" />
+
+          <!-- 鬃毛中的鎏金发丝高光 -->
+          <path d="M 602,268 C 535,248 462,282 422,342 C 398,378 372,395 342,396" fill="none" stroke="url(#gold-grad)" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+          <path d="M 586,312 C 518,298 452,342 420,402 C 398,442 372,458 340,462" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+          <path d="M 570,368 C 510,362 455,402 428,458" fill="none" stroke="url(#gold-grad)" stroke-width="1.6" stroke-linecap="round" opacity="0.8" />
+        </g>
+
+        <!-- 4.7 环绕独角兽的上升星尘光球 -->
+        <g id="floating-orbs">
+          <circle cx="310" cy="620" r="4" fill="#ffe6a3" class="magic-orb" style="--dur: 4.5s; --delay: 0s;" />
+          <circle cx="685" cy="560" r="3.5" fill="#80ffea" class="magic-orb" style="--dur: 5.2s; --delay: 1.2s;" />
+          <circle cx="465" cy="310" r="4.5" fill="#ff94e8" class="magic-orb" style="--dur: 4.8s; --delay: 0.6s;" />
+          <circle cx="695" cy="390" r="3" fill="#ffffff" class="magic-orb" style="--dur: 3.9s; --delay: 2.0s;" />
+          <circle cx="240" cy="540" r="3.5" fill="#b57cff" class="magic-orb" style="--dur: 5.6s; --delay: 1.5s;" />
+          <use href="#sparkle-star" x="690" y="210" transform="scale(0.65)" class="star-twinkle" style="--dur: 2.4s; --delay: 0.3s;" />
+          <use href="#sparkle-star" x="450" y="255" transform="scale(0.75)" class="star-twinkle" style="--dur: 3.1s; --delay: 1.1s;" />
+          <use href="#sparkle-star" x="260" y="485" transform="scale(0.8)" class="star-twinkle" style="--dur: 2.9s; --delay: 0.8s;" />
+          <use href="#sparkle-star" x="660" y="655" transform="scale(0.7)" class="star-twinkle" style="--dur: 3.5s; --delay: 1.7s;" />
+        </g>
+      </g>
+
+      <!-- ================= 5. 前景梦幻流云底座 ================= -->
+      <g class="cloud-drift-right" id="foreground-clouds">
+        <!-- 云层柔和底部辉光 -->
+        <ellipse cx="500" cy="795" rx="360" ry="55" fill="url(#cloud-grad-2)" filter="url(#glow-soft)" />
+        <!-- 前景半透明祥云轮廓 -->
+        <path d="
+          M 160,825
+          C 155,782 205,748 258,765
+          C 288,718 365,715 408,752
+          C 455,702 552,705 595,755
+          C 642,718 722,725 752,768
+          C 798,752 845,782 840,825
+          Z
+        " fill="url(#cloud-grad-1)" />
+        <!-- 云端鎏金描边丝线 -->
+        <path d="
+          M 185,795 C 215,768 258,772 282,792
+          M 315,758 C 355,732 405,742 432,772
+          M 468,745 C 515,718 575,728 605,765
+          M 645,755 C 688,735 735,748 758,778
+        " fill="none" stroke="url(#gold-grad)" stroke-width="1.5" stroke-linecap="round" opacity="0.45" />
+      </g>
+
+      <!-- ================= 6. 交互点击动态星芒容器 ================= -->
+      <g id="interactive-bursts"></g>
+    </svg>
+  </main>
+
+  <!-- 底部中文交互控制栏 -->
+  <nav class="control-dock" aria-label="画布控制面板">
+    <button class="ctrl-btn active" data-theme="dream" type="button">
+      <span class="dot-swatch" style="background: linear-gradient(135deg, #ff94e8, #5ce1e6);"></span>星夜幻彩
+    </button>
+    <button class="ctrl-btn" data-theme="aurora" type="button">
+      <span class="dot-swatch" style="background: linear-gradient(135deg, #4fffb0, #38b6ff);"></span>极光翡翠
+    </button>
+    <button class="ctrl-btn" data-theme="dawn" type="button">
+      <span class="dot-swatch" style="background: linear-gradient(135deg, #ffd166, #ff5e7e);"></span>暮光流金
+    </button>
+    <button class="ctrl-btn" data-theme="cyber" type="button">
+      <span class="dot-swatch" style="background: linear-gradient(135deg, #00f5d4, #ff007f);"></span>赛博霓虹
+    </button>
+    <div class="divider"></div>
+    <button class="ctrl-btn" id="btn-magic" type="button">✨ 绽放星芒</button>
+    <button class="ctrl-btn" id="btn-toggle-anim" type="button">⏸ 暂停动画</button>
+  </nav>
+
+<script>
+  (function () {
+    // 主题配色方案配置
+    const THEMES = {
+      dream: {
+        bgTop: '#070514', bgMid: '#110b29',
+        neb1: ['#6b3fa0', '#331c6e'], neb2: ['#ff6ec7', '#4589ff'],
+        body: ['#ffffff', '#f3ecff', '#d5c2f7', '#a58be0'],
+        fleg: ['#cbb8f0', '#9e82d6', '#6e50ad'],
+        ma: ['#ff94e8', '#b57cff', '#5ce1e6', '#ffe999'],
+        mb: ['#ffd670', '#ff65b3', '#7b52ff', '#38b6ff'],
+        mc: ['#ffffff', '#ffb8f0', '#80ffea']
+      },
+      aurora: {
+        bgTop: '#031014', bgMid: '#07222c',
+        neb1: ['#0f766e', '#113f67'], neb2: ['#4fffb0', '#38b6ff'],
+        body: ['#ffffff', '#ebfffb', '#bcece6', '#7bc4c4'],
+        fleg: ['#a3ded9', '#6ab0b5', '#3d7a8a'],
+        ma: ['#72efdd', '#48bfe3', '#5390d9', '#b8f2e6'],
+        mb: ['#80ffdb', '#4ea8de', '#5e60ce', '#64dfdf'],
+        mc: ['#ffffff', '#a8ffea', '#72efdd']
+      },
+      dawn: {
+        bgTop: '#160712', bgMid: '#2b0f22',
+        neb1: ['#9d2a5c', '#4a153b'], neb2: ['#ffb703', '#fb5607'],
+        body: ['#fffdf9', '#ffeedd', '#f7cad0', '#d998b5'],
+        fleg: ['#e8b4bc', '#c27ba0', '#8c4a75'],
+        ma: ['#ffea9f', '#ff9e6d', '#ff5d8f', '#c77dff'],
+        mb: ['#ffd166', '#ef476f', '#9b5de5', '#ff9f1c'],
+        mc: ['#ffffff', '#ffd6a5', '#ff8fa3']
+      },
+      cyber: {
+        bgTop: '#050214', bgMid: '#0d0630',
+        neb1: ['#560bad', '#240046'], neb2: ['#f72585', '#4cc9f0'],
+        body: ['#f8f9fa', '#e0fbfc', '#b5bdf7', '#726cf8'],
+        fleg: ['#9896f1', '#6857d6', '#3f2b96'],
+        ma: ['#00f5d4', '#00bbf9', '#f15bb5', '#fee440'],
+        mb: ['#f72585', '#7209b7', '#3a0ca3', '#4cc9f0'],
+        mc: ['#ffffff', '#72efdd', '#ff70a6']
+      }
+    };
+
+    const setStop = (id, color) => {
+      const el = document.getElementById(id);
+      if (el) el.setAttribute('stop-color', color);
+    };
+
+    const applyTheme = (key) => {
+      const t = THEMES[key];
+      if (!t) return;
+      document.documentElement.style.setProperty('--bg-top', t.bgTop);
+      document.documentElement.style.setProperty('--bg-mid', t.bgMid);
+
+      setStop('neb-s1', t.neb1[0]);
+      setStop('neb-s2', t.neb1[1]);
+      setStop('neb2-s1', t.neb2[0]);
+      setStop('neb2-s2', t.neb2[1]);
+
+      setStop('body-s1', t.body[0]);
+      setStop('body-s2', t.body[1]);
+      setStop('body-s3', t.body[2]);
+      setStop('body-s4', t.body[3]);
+
+      setStop('fleg-s1', t.fleg[0]);
+      setStop('fleg-s2', t.fleg[1]);
+      setStop('fleg-s3', t.fleg[2]);
+
+      setStop('ma-s1', t.ma[0]);
+      setStop('ma-s2', t.ma[1]);
+      setStop('ma-s3', t.ma[2]);
+      setStop('ma-s4', t.ma[3]);
+
+      setStop('mb-s1', t.mb[0]);
+      setStop('mb-s2', t.mb[1]);
+      setStop('mb-s3', t.mb[2]);
+      setStop('mb-s4', t.mb[3]);
+
+      setStop('mc-s1', t.mc[0]);
+      setStop('mc-s2', t.mc[1]);
+      setStop('mc-s3', t.mc[2]);
+    };
+
+    // 绑定主题按钮
+    const themeBtns = document.querySelectorAll('[data-theme]');
+    themeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        themeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyTheme(btn.getAttribute('data-theme'));
+        spawnMagicBurst(560, 360, 14);
+      });
+    });
+
+    // 动画暂停/播放控制
+    let isPlaying = true;
+    const btnToggleAnim = document.getElementById('btn-toggle-anim');
+    btnToggleAnim.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      document.documentElement.style.setProperty('--anim-play', isPlaying ? 'running' : 'paused');
+      btnToggleAnim.textContent = isPlaying ? '⏸ 暂停动画' : '▶ 继续动画';
+      btnToggleAnim.classList.toggle('active', !isPlaying);
+    });
+
+    // 在 SVG 指定坐标绽放星芒粒子特效
+    const burstGroup = document.getElementById('interactive-bursts');
+    const svgEl = document.getElementById('unicorn-art');
+    const COLORS = ['#ffe999', '#ff94e8', '#5ce1e6', '#ffffff', '#b57cff'];
+
+    function spawnMagicBurst(cx, cy, count = 16) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+        const dist = 45 + Math.random() * 95;
+        const tx = cx + Math.cos(angle) * dist;
+        const ty = cy + Math.sin(angle) * dist - 20;
+        const color = COLORS[i % COLORS.length];
+        const size = 0.45 + Math.random() * 0.65;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('transform', `translate(${cx}, ${cy}) scale(0.1)`);
+        g.style.transition = 'transform 0.95s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.95s ease-out';
+        g.style.opacity = '1';
+
+        const star = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        star.setAttribute('d', 'M 0,-12 C 1,-3 3,-1 12,0 C 3,1 1,3 0,12 C -1,3 -3,1 -12,0 C -3,-1 -1,-3 0,-12 Z');
+        star.setAttribute('fill', color);
+        g.appendChild(star);
+        burstGroup.appendChild(g);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            g.setAttribute('transform', `translate(${tx}, ${ty}) scale(${size}) rotate(${Math.round(Math.random() * 120)} )`);
+            g.style.opacity = '0';
+          });
+        });
+
+        setTimeout(() => {
+          if (g.parentNode) g.parentNode.removeChild(g);
+        }, 1000);
+      }
+    }
+
+    // 点击“绽放星芒”按钮在圣角与独角兽周围触发特效
+    document.getElementById('btn-magic').addEventListener('click', () => {
+      spawnMagicBurst(739, 135, 18);
+      setTimeout(() => spawnMagicBurst(500, 440, 14), 160);
+    });
+
+    // 点击或触摸 SVG 画布任意位置绽放星芒
+    svgEl.addEventListener('pointerdown', (e) => {
+      const pt = svgEl.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const svgP = pt.matrixTransform(svgEl.getScreenCTM().inverse());
+      spawnMagicBurst(svgP.x, svgP.y, 16);
+    });
+  })();
+</script>
+</body>
+</html>
