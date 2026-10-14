@@ -31,6 +31,13 @@
   .tag.model{color:var(--cyan);border-color:rgba(6,182,212,.4);background:rgba(6,182,212,.08)}
   .btn{display:inline-block;text-align:center;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;font-weight:700;font-size:14px;padding:10px 18px;border-radius:8px;text-decoration:none}
   .btn:hover{opacity:.92}
+  .tag.ok{color:var(--emerald);border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.08)}
+  .tag.fail{color:#f87171;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+  .tag.wait{color:var(--amber);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+  .btn-row{display:flex;gap:10px}
+  .btn-row .btn{flex:1}
+  .btn.disabled{opacity:.45;pointer-events:none}
   section.bench{background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:28px;margin-bottom:40px}
   section.bench h3{font-size:17px;margin-bottom:10px}
   section.bench p{color:var(--muted);font-size:14px;line-height:1.8}
@@ -73,9 +80,44 @@
   </div>
 
   <section class="bench">
-    <h3>🧪 模型能力横向测试（筹备中）</h3>
-    <p>下一步：用同一套网页任务（信息图解 / 数据仪表盘 / 小游戏），在 <code>Gemini</code>、<code>Claude</code>、<code>GPT</code> 等主流模型上各跑一遍，输出全部入库、每个案例附完整提示词，形成可对比的能力集锦。目录规范：<code>bench/&lt;任务&gt;-&lt;模型&gt;/index.html</code> + <code>prompt.md</code>。</p>
+    <h3>🧪 模型能力横向测试 · 浏览器版 Gemini 4（4 Argon · 思考等级"高点"）</h3>
+    <p>同一套网页任务，只测浏览器版 Gemini 4。每个案例均为模型原始输出（未修复、未补写），并附完整提示词与真实尝试记录——失败也如实公开。</p>
   </section>
+
+  <div class="grid">
+    <div class="card">
+      <div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">独角兽文件提取中…</div>
+      <div class="case-no">BENCH A</div>
+      <h2>SVG 独角兽 · 梦幻星空主题</h2>
+      <p>纯 SVG 手绘独角兽：鎏金角、星月光环、粒子与浮动闪烁动画，支持浅色/深色主题切换。一次生成成功，完整文件正在提取。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag wait">文件提取中</span></div>
+      <div class="btn-row"><a class="btn disabled" href="#">查看页面 →</a><a class="btn ghost" href="./bench/unicorn-4argon/prompt.md" target="_blank" rel="noopener">测试记录</a></div>
+    </div>
+    <div class="card">
+      <a class="thumb" href="./bench/snake-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-snake.jpg" alt="贪吃蛇预览" loading="lazy"></a>
+      <div class="case-no">BENCH B</div>
+      <h2>贪吃蛇小游戏</h2>
+      <p>20×20 网格：计分、localStorage 最高分、开始/暂停/重开、结算面板、键盘 WASD + 触屏滑动、速度递增。前两次被单次输出长度截断，第三次加精简要求后一次成功（12KB）。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">12KB</span></div>
+      <div class="btn-row"><a class="btn" href="./bench/snake-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/snake-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
+    <div class="card">
+      <div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#f87171;font-size:13px">未完成 · 无页面</div>
+      <div class="case-no">BENCH C</div>
+      <h2>个人健康数据仪表盘</h2>
+      <p>三次尝试均失败：三个手写图表的 CSS 过长导致输出截断，分段提取补救也失败。已正式记档，不伪造、不补写页面。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag fail">未完成</span></div>
+      <div class="btn-row"><a class="btn ghost" href="./bench/dashboard-4argon/prompt.md" target="_blank" rel="noopener">查看测试记录 →</a></div>
+    </div>
+    <div class="card">
+      <a class="thumb" href="./bench/landing-4argon/" target="_blank" rel="noopener"><img src="./previews/bench-landing.jpg" alt="MemoInk 落地页预览" loading="lazy"></a>
+      <div class="case-no">BENCH D</div>
+      <h2>「墨迹 MemoInk」AI 笔记产品落地页</h2>
+      <p>导航栏 / hero / 三张特性卡片 / 三档价格 / 页脚 / 微交互（弹窗、Toast）。简洁提示词 + 代码块下载按钮，一次成功（95KB，零外部依赖）。此前"30KB 截断"实为复制提取路径的问题，而非模型输出上限。</p>
+      <div class="tags"><span class="tag model">Gemini 4</span><span class="tag ok">一次成功</span><span class="tag">95KB</span></div>
+      <div class="btn-row"><a class="btn" href="./bench/landing-4argon/" target="_blank" rel="noopener">查看页面 →</a><a class="btn ghost" href="./bench/landing-4argon/prompt.md" target="_blank" rel="noopener">提示词与记录</a></div>
+    </div>
+  </div>
 
   <footer>
     由 Gemini 4 生成 · 测试案例公开展示<br>
