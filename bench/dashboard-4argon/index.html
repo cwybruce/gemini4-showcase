@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AETHER HEALTH // 个人健康数据中枢</title>
+  <style>
+    :root {
+      --bg-base: #060a12;
+      --bg-panel: rgba(13, 21, 38, 0.78);
+      --bg-panel-hover: rgba(18, 29, 52, 0.88);
+      --border-dim: rgba(56, 189, 248, 0.14);
+      --border-glow: rgba(56, 189, 248, 0.42);
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --cyan: #00f2fe;
+      --blue: #38bdf8;
+      --purple: #a855f7;
+      --indigo: #6366f1;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-card: 0 12px 32px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 38%),
+        radial-gradient(circle at 88% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
+        linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    /* 顶部导航栏 */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 18px 24px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(99, 102, 241, 0.25));
+      border: 1px solid rgba(0, 242, 254, 0.45);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 18px rgba(0, 242, 254, 0.25);
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-live {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-live::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.25); }
+    }
+
+    .brand-sub {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .seg-group {
+      display: inline-flex;
+      background: rgba(6, 10, 18, 0.75);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-dim);
+    }
+
+    .seg-btn {
+      background: transparent;
+      color: var(--text-sub);
+      border: none;
+      padding: 6px 14px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .seg-btn.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.22), rgba(56, 189, 248, 0.12));
+      color: var(--cyan);
+      box-shadow: inset 0 0 0 1px rgba(0, 242, 254, 0.35);
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+      color: #e2e8f0;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* 顶部4张指标卡片 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      position: relative;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-glow);
+    }
+
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--cyan));
+      opacity: 0.85;
+      box-shadow: 0 0 12px var(--card-accent, var(--cyan));
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--card-accent, var(--cyan));
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-unit {
+      font-size: 0.84rem;
+      color: var(--text-sub);
+    }
+
+    .kpi-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+
+    .trend-tag {
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .trend-up {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .trend-down {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+    }
+
+    .kpi-progress-bg {
+      margin-top: 10px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      overflow: hidden;
+    }
+
+    .kpi-progress-bar {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--card-accent, var(--cyan));
+      box-shadow: 0 0 10px var(--card-accent, var(--cyan));
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 主图表区布局 */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.65fr 1fr;
+      gap: 20px;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .panel-title-group h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dot-color, var(--cyan));
+      box-shadow: 0 0 10px var(--dot-color, var(--cyan));
+    }
+
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-top: 3px;
+    }
+
+    .panel-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    /* SVG 容器通用样式 */
+    .svg-wrap {
+      width: 100%;
+      position: relative;
+      user-select: none;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    /* 柱状图与折线图交互样式 */
+    .bar-group {
+      cursor: pointer;
+    }
+
+    .bar-rect {
+      transition: opacity 0.2s ease, filter 0.2s ease;
+    }
+
+    .bar-group:hover .bar-rect {
+      filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.65));
+    }
+
+    .bar-hit-area {
+      fill: transparent;
+    }
+
+    .sleep-node {
+      cursor: pointer;
+      transition: r 0.2s ease, stroke-width 0.2s ease;
+    }
+
+    .sleep-node:hover {
+      r: 7;
+      stroke-width: 4;
+    }
+
+    /* 运动环形图区域 */
+    .workout-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    .ring-box {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      margin: 4px auto;
+    }
+
+    .ring-segment {
+      cursor: pointer;
+      transition: stroke-width 0.25s ease, filter 0.25s ease, opacity 0.25s ease;
+    }
+
+    .ring-segment:hover {
+      stroke-width: 22;
+      filter: drop-shadow(0 0 10px currentColor);
+    }
+
+    .ring-center-info {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .ring-center-label {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .ring-center-val {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.15;
+      margin: 2px 0;
+    }
+
+    .ring-center-sub {
+      font-size: 0.76rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-top: 4px;
+    }
+
+    .workout-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .workout-item {
+      background: rgba(6, 10, 18, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    .workout-item:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      transform: translateX(3px);
+    }
+
+    .workout-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .workout-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .workout-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .workout-mins {
+      font-variant-numeric: tabular-nums;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .workout-mins span {
+      color: var(--text-sub);
+      font-weight: 400;
+      font-size: 0.78rem;
+      margin-left: 4px;
+    }
+
+    .workout-bar-track {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .workout-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 全局悬浮 Tooltip */
+    .chart-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+      background: rgba(9, 14, 26, 0.94);
+      border: 1px solid rgba(0, 242, 254, 0.45);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65), 0 0 15px rgba(0, 242, 254, 0.2);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: translate(-50%, -110%) scale(0.95);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .chart-tooltip.visible {
+      opacity: 1;
+      transform: translate(-50%, -115%) scale(1);
+    }
+
+    .tt-title {
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 3px;
+      font-size: 0.82rem;
+    }
+
+    .tt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--text-sub);
+    }
+
+    .tt-val {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 1080px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 14px;
+      }
+      .header {
+        padding: 16px;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .panel {
+        padding: 16px;
+      }
+      .kpi-value {
+        font-size: 1.6rem;
+      }
+      .ring-box {
+        width: 220px;
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部栏 -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>AETHER BIO-METRICS <span class="badge-live">穿戴设备已同步</span></h1>
+          <div class="brand-sub" id="currentDateText">智能健康体征监测中枢 · 实时遥测分析</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="seg-group" role="tablist" aria-label="周期切换">
+          <button class="seg-btn active" data-period="current" id="btnCurrentWeek">本周数据</button>
+          <button class="seg-btn" data-period="last" id="btnLastWeek">上周数据</button>
+        </div>
+        <button class="action-btn" id="btnRandomize" title="生成一组随机模拟健康数据">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          模拟脉冲数据
+        </button>
+      </div>
+    </header>
+
+    <!-- 核心数据卡片 -->
+    <section class="kpi-grid" aria-label="关键体征指标">
+      <!-- 卡片1：日均步数 -->
+      <article class="kpi-card" style="--card-accent: #00f2fe;">
+        <div class="kpi-top">
+          <span class="kpi-label">日均步数 (7天)</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 4v16M7 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpiStepsVal">10,842</span>
+          <span class="kpi-unit">步 / 天</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="trend-tag trend-up" id="kpiStepsTrend">▲ +12.4% 较上周</span>
+          <span style="color: var(--text-sub)" id="kpiStepsGoalRate">达标 5/7 天</span>
+        </div>
+        <div class="kpi-progress-bg">
+          <div class="kpi-progress-bar" id="kpiStepsBar" style="width: 86%;"></div>
+        </div>
+      </article>
+
+      <!-- 卡片2：平均睡眠 -->
+      <article class="kpi-card" style="--card-accent: #a855f7;">
+        <div class="kpi-top">
+          <span class="kpi-label">平均睡眠时长</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpiSleepVal">7.6</span>
+          <span class="kpi-unit">小时 / 晚</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="trend-tag trend-up" id="kpiSleepTrend">▲ 深睡占比 28%</span>
+          <span style="color: var(--text-sub)" id="kpiSleepScore">睡眠质量 91分</span>
+        </div>
+        <div class="kpi-progress-bg">
+          <div class="kpi-progress-bar" id="kpiSleepBar" style="width: 92%;"></div>
+        </div>
+      </article>
+
+      <!-- 卡片3：本周运动总时长 -->
+      <article class="kpi-card" style="--card-accent: #10b981;">
+        <div class="kpi-top">
+          <span class="kpi-label">周累计运动时长</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpiWorkoutVal">315</span>
+          <span class="kpi-unit">分钟</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="trend-tag trend-up" id="kpiWorkoutTrend">▲ 消耗 2,480 千卡</span>
+          <span style="color: var(--text-sub)" id="kpiWorkoutTarget">目标 300 分钟</span>
+        </div>
+        <div class="kpi-progress-bg">
+          <div class="kpi-progress-bar" id="kpiWorkoutBar" style="width: 100%;"></div>
+        </div>
+      </article>
+
+      <!-- 卡片4：静息心率 & 血氧 -->
+      <article class="kpi-card" style="--card-accent: #f43f5e;">
+        <div class="kpi-top">
+          <span class="kpi-label">静息心率 / 血氧饱和度</span>
+          <div class="kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value" id="kpiHeartVal">58</span>
+          <span class="kpi-unit">BPM · SpO₂ 99%</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="trend-tag trend-up" id="kpiHeartStatus">● 心肺体能极佳</span>
+          <span style="color: var(--text-sub)" id="kpiHrvVal">HRV 74 ms</span>
+        </div>
+        <div class="kpi-progress-bg">
+          <div class="kpi-progress-bar" id="kpiHeartBar" style="width: 78%;"></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- 图表主区域 -->
+    <main class="charts-grid">
+      <div class="left-column">
+        <!-- 图表 1：7天步数柱状图 (原生 SVG) -->
+        <section class="panel" aria-label="7天步数柱状图">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <h2><span class="title-dot" style="--dot-color: #00f2fe;"></span>7 天步数趋势分析</h2>
+              <div class="panel-subtitle">每日步数与 10,000 步基准目标对比（点击或悬停柱体查看详情）</div>
+            </div>
+            <div class="panel-meta">
+              <span class="legend-item">
+                <i class="legend-swatch" style="background: linear-gradient(180deg, #00f2fe, #0284c7);"></i>达标步数
+              </span>
+              <span class="legend-item">
+                <i class="legend-swatch" style="background: linear-gradient(180deg, #38bdf8, #1e3a8a); opacity: 0.7;"></i>基础步数
+              </span>
+              <span class="legend-item">
+                <i class="legend-swatch" style="background: #f59e0b; height: 2px;"></i>目标线 (10k)
+              </span>
+            </div>
+          </div>
+
+          <div class="svg-wrap">
+            <svg id="stepsBarSvg" class="chart-svg" viewBox="0 0 720 250" role="img" aria-label="7天步数柱状图"></svg>
+          </div>
+        </section>
+
+        <!-- 图表 2：7天睡眠时长折线图 (原生 SVG) -->
+        <section class="panel" aria-label="7天睡眠时长折线图">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <h2><span class="title-dot" style="--dot-color: #a855f7;"></span>7 天睡眠时长与深睡监测</h2>
+              <div class="panel-subtitle">平滑曲线展示总睡眠时长，绿色光带为推荐黄金睡眠区间 (7~9h)</div>
+            </div>
+            <div class="panel-meta">
+              <span class="legend-item">
+                <i class="legend-swatch" style="background: #a855f7; border-radius: 50%;"></i>睡眠总时长
+              </span>
+              <span class="legend-item">
+                <i class="legend-swatch" style="background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981;"></i>黄金区间 (7-9h)
+              </span>
+            </div>
+          </div>
+
+          <div class="svg-wrap">
+            <svg id="sleepLineSvg" class="chart-svg" viewBox="0 0 720 250" role="img" aria-label="睡眠时长折线图"></svg>
+          </div>
+        </section>
+      </div>
+
+      <!-- 图表 3：本周运动时长环形图 (原生 SVG) -->
+      <section class="panel" aria-label="本周运动时长环形图">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h2><span class="title-dot" style="--dot-color: #10b981;"></span>本周运动时长结构</h2>
+            <div class="panel-subtitle">四大运动类型时长占比与热量消耗分布</div>
+          </div>
+        </div>
+
+        <div class="workout-layout">
+          <div class="ring-box">
+            <svg id="workoutRingSvg" class="chart-svg" viewBox="0 0 260 260" role="img" aria-label="运动时长环形图"></svg>
+            <div class="ring-center-info">
+              <span class="ring-center-label" id="ringCenterTitle">本周总运动</span>
+              <div class="ring-center-val" id="ringCenterVal">315<small style="font-size:0.9rem;font-weight:500;">分</small></div>
+              <span class="ring-center-sub" id="ringCenterSub">完成度 105%</span>
+            </div>
+          </div>
+
+          <div class="workout-list" id="workoutLegendList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 悬浮提示框 -->
+  <div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
+
+  <script>
+    (function () {
+      const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+      // 预设数据集：本周 vs 上周
+      const DATASETS = {
+        current: {
+          steps: [9420, 11280, 8650, 12450, 10390, 14620, 9085],
+          sleep: [
+            { total: 7.4, deep: 2.1, score: 88 },
+            { total: 7.9, deep: 2.4, score: 93 },
+            { total: 6.5, deep: 1.6, score: 79 },
+            { total: 8.2, deep: 2.6, score: 95 },
+            { total: 7.1, deep: 2.0, score: 86 },
+            { total: 8.6, deep: 2.8, score: 96 },
+            { total: 7.7, deep: 2.3, score: 92 }
+          ],
+          workouts: [
+            { name: '有氧耐力跑', mins: 120, kcal: 1080, color: '#00f2fe' },
+            { name: '力量抗阻训练', mins: 95, kcal: 720, color: '#a855f7' },
+            { name: 'HIIT 高强燃脂', mins: 55, kcal: 540, color: '#10b981' },
+            { name: '核心与柔韧拉伸', mins: 45, kcal: 185, color: '#f59e0b' }
+          ],
+          heartRate: 58,
+          hrv: 74,
+          spo2: 99
+        },
+        last: {
+          steps: [8120, 9540, 7890, 10420, 9150, 11800, 10520],
+          sleep: [
+            { total: 6.8, deep: 1.8, score: 82 },
+            { total: 7.2, deep: 2.0, score: 86 },
+            { total: 6.2, deep: 1.4, score: 75 },
+            { total: 7.5, deep: 2.2, score: 89 },
+            { total: 6.9, deep: 1.9, score: 83 },
+            { total: 8.1, deep: 2.4, score: 92 },
+            { total: 7.4, deep: 2.1, score: 88 }
+          ],
+          workouts: [
+            { name: '有氧耐力跑', mins: 95, kcal: 850, color: '#00f2fe' },
+            { name: '力量抗阻训练', mins: 80, kcal: 610, color: '#a855f7' },
+            { name: 'HIIT 高强燃脂', mins: 40, kcal: 390, color: '#10b981' },
+            { name: '核心与柔韧拉伸', mins: 50, kcal: 200, color: '#f59e0b' }
+          ],
+          heartRate: 61,
+          hrv: 68,
+          spo2: 98
+        }
+      };
+
+      let activePeriod = 'current';
+      const tooltip = document.getElementById('chartTooltip');
+
+      // 初始化顶部日期显示
+      function initDateHeader() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'long'
+        });
+        document.getElementById('currentDateText').textContent = `智能健康体征监测中枢 · ${dateStr}`;
+      }
+
+      // 工具函数：显示与隐藏 Tooltip
+      function showTooltip(evt, htmlContent) {
+        tooltip.innerHTML = htmlContent;
+        tooltip.classList.add('visible');
+        moveTooltip(evt);
+      }
+
+      function moveTooltip(evt) {
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        const pad = 16;
+        const x = Math.min(Math.max(clientX, 90), window.innerWidth - 90);
+        const y = Math.max(clientY - pad, 70);
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
+      }
+
+      function hideTooltip() {
+        tooltip.classList.remove('visible');
+      }
+
+      // 更新顶部 4 张 KPI 卡片
+      function renderKPIs(data) {
+        const avgSteps = Math.round(data.steps.reduce((a, b) => a + b, 0) / data.steps.length);
+        const goalDays = data.steps.filter(s => s >= 10000).length;
+        document.getElementById('kpiStepsVal').textContent = avgSteps.toLocaleString('zh-CN');
+        document.getElementById('kpiStepsGoalRate').textContent = `达标 ${goalDays}/7 天`;
+        document.getElementById('kpiStepsBar').style.width = `${Math.min(100, Math.round((avgSteps / 12000) * 100))}%`;
+
+        const avgSleep = (data.sleep.reduce((a, b) => a + b.total, 0) / data.sleep.length).toFixed(1);
+        const avgDeep = (data.sleep.reduce((a, b) => a + b.deep, 0) / data.sleep.length);
+        const deepRatio = Math.round((avgDeep / avgSleep) * 100);
+        const avgScore = Math.round(data.sleep.reduce((a, b) => a + b.score, 0) / data.sleep.length);
+        document.getElementById('kpiSleepVal').textContent = avgSleep;
+        document.getElementById('kpiSleepTrend').textContent = `▲ 深睡占比 ${deepRatio}%`;
+        document.getElementById('kpiSleepScore').textContent = `睡眠质量 ${avgScore}分`;
+        document.getElementById('kpiSleepBar').style.width = `${avgScore}%`;
+
+        const totalMins = data.workouts.reduce((a, b) => a + b.mins, 0);
+        const totalKcal = data.workouts.reduce((a, b) => a + b.kcal, 0);
+        document.getElementById('kpiWorkoutVal').textContent = totalMins;
+        document.getElementById('kpiWorkoutTrend').textContent = `▲ 消耗 ${totalKcal.toLocaleString('zh-CN')} 千卡`;
+        document.getElementById('kpiWorkoutBar').style.width = `${Math.min(100, Math.round((totalMins / 300) * 100))}%`;
+
+        document.getElementById('kpiHeartVal').textContent = data.heartRate;
+        document.getElementById('kpiHrvVal').textContent = `HRV ${data.hrv} ms`;
+        document.getElementById('kpiHeartBar').style.width = `${Math.min(100, data.hrv)}%`;
+      }
+
+      // 1. 渲染 7 天步数柱状图 (原生 SVG)
+      function renderStepsBarChart(stepsData) {
+        const svg = document.getElementById('stepsBarSvg');
+        const width = 720;
+        const height = 250;
+        const pad = { top: 26, right: 24, bottom: 34, left: 48 };
+        const plotW = width - pad.left - pad.right;
+        const plotH = height - pad.top - pad.bottom;
+        const maxVal = 16000;
+        const targetSteps = 10000;
+
+        let html = `
+          <defs>
+            <linearGradient id="barGradGoal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00f2fe" />
+              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.75" />
+            </linearGradient>
+            <linearGradient id="barGradNormal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.55" />
+            </linearGradient>
+          </defs>
+        `;
+
+        // 绘制水平网格线与 Y 轴刻度
+        const yTicks = [0, 4000, 8000, 12000, 16000];
+        yTicks.forEach(val => {
+          const y = pad.top + plotH - (val / maxVal) * plotH;
+          const label = val === 0 ? '0' : `${val / 1000}k`;
+          html += `
+            <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}"
+              stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="${val === 0 ? 'none' : '4 4'}" />
+            <text x="${pad.left - 10}" y="${y + 4}" text-anchor="end"
+              fill="#64748b" font-size="11">${label}</text>
+          `;
+        });
+
+        // 10,000 步目标虚线
+        const targetY = pad.top + plotH - (targetSteps / maxVal) * plotH;
+        html += `
+          <line x1="${pad.left}" y1="${targetY}" x2="${width - pad.right}" y2="${targetY}"
+            stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.85" />
+          <rect x="${width - pad.right - 66}" y="${targetY - 18}" width="66" height="16" rx="4"
+            fill="rgba(245, 158, 11, 0.16)" stroke="rgba(245, 158, 11, 0.4)" />
+          <text x="${width - pad.right - 33}" y="${targetY - 7}" text-anchor="middle"
+            fill="#fbbf24" font-size="10" font-weight="600">目标 10k</text>
+        `;
+
+        // 绘制 7 根柱子
+        const stepX = plotW / stepsData.length;
+        const barW = 36;
+
+        stepsData.forEach((val, idx) => {
+          const clampedVal = Math.min(val, maxVal);
+          const barH = (clampedVal / maxVal) * plotH;
+          const x = pad.left + idx * stepX + (stepX - barW) / 2;
+          const y = pad.top + plotH - barH;
+          const isGoalMet = val >= targetSteps;
+          const gradId = isGoalMet ? 'url(#barGradGoal)' : 'url(#barGradNormal)';
+
+          html += `
+            <g class="bar-group" data-idx="${idx}">
+              <!-- 背景槽 -->
+              <rect x="${x}" y="${pad.top}" width="${barW}" height="${plotH}" rx="7"
+                fill="rgba(255, 255, 255, 0.025)" />
+              <!-- 实际数据柱 -->
+              <rect class="bar-rect" x="${x}" y="${y}" width="${barW}" height="${barH}" rx="7"
+                fill="${gradId}" />
+              <!-- 顶部数值标签 -->
+              <text x="${x + barW / 2}" y="${y - 7}" text-anchor="middle"
+                fill="${isGoalMet ? '#00f2fe' : '#94a3b8'}" font-size="11" font-weight="600">
+                ${(val / 1000).toFixed(1)}k
+              </text>
+              <!-- X轴星期标签 -->
+              <text x="${x + barW / 2}" y="${height - 10}" text-anchor="middle"
+                fill="#94a3b8" font-size="12" font-weight="500">${DAYS[idx]}</text>
+              <!-- 透明热区方便交互 -->
+              <rect class="bar-hit-area" x="${pad.left + idx * stepX}" y="${pad.top}"
+                width="${stepX}" height="${plotH + 24}" />
+            </g>
+          `;
+        });
+
+        svg.innerHTML = html;
+
+        // 绑定柱状图悬停/触摸事件
+        svg.querySelectorAll('.bar-group').forEach(group => {
+          const idx = Number(group.getAttribute('data-idx'));
+          const val = stepsData[idx];
+          const kcal = Math.round(val * 0.042);
+          const km = (val * 0.00072).toFixed(2);
+          const status = val >= 10000 ? '<span style="color:#34d399">已达标</span>' : '<span style="color:#fbbf24">未达标</span>';
+
+          const content = `
+            <div class="tt-title">${DAYS[idx]} · 步数详情</div>
+            <div class="tt-row"><span>总步数</span><span class="tt-val">${val.toLocaleString()} 步 (${status})</span></div>
+            <div class="tt-row"><span>折合里程</span><span class="tt-val">${km} 公里</span></div>
+            <div class="tt-row"><span>活动消耗</span><span class="tt-val">${kcal} 千卡</span></div>
+          `;
+
+          group.addEventListener('mouseenter', e => showTooltip(e, content));
+          group.addEventListener('mousemove', moveTooltip);
+          group.addEventListener('mouseleave', hideTooltip);
+          group.addEventListener('touchstart', e => showTooltip(e, content), { passive: true });
+        });
+      }
+
+      // 2. 渲染 7 天睡眠时长平滑折线图 (原生 SVG)
+      function renderSleepLineChart(sleepData) {
+        const svg = document.getElementById('sleepLineSvg');
+        const width = 720;
+        const height = 250;
+        const pad = { top: 24, right: 24, bottom: 34, left: 48 };
+        const plotW = width - pad.left - pad.right;
+        const plotH = height - pad.top - pad.bottom;
+        const minH = 4;
+        const maxH = 10;
+
+        const getX = idx => pad.left + (idx / (sleepData.length - 1)) * plotW;
+        const getY = val => pad.top + plotH - ((val - minH) / (maxH - minH)) * plotH;
+
+        // 生成平滑贝塞尔曲线路径
+        const points = sleepData.map((d, i) => ({ x: getX(i), y: getY(d.total), ...d }));
+        function buildSmoothPath(pts) {
+          if (pts.length === 0) return '';
+          let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = pts[i];
+            const p1 = pts[i + 1];
+            const cpx1 = p0.x + (p1.x - p0.x) * 0.45;
+            const cpy1 = p0.y;
+            const cpx2 = p0.x + (p1.x - p0.x) * 0.55;
+            const cpy2 = p1.y;
+            d += ` C ${cpx1.toFixed(1)} ${cpy1.toFixed(1)}, ${cpx2.toFixed(1)} ${cpy2.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+          }
+          return d;
+        }
+
+        const linePath = buildSmoothPath(points);
+        const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${pad.top + plotH} L ${points[0].x.toFixed(1)} ${pad.top + plotH} Z`;
+
+        // 推荐睡眠区间 7h ~ 9h 光带
+        const bandTop = getY(9);
+        const bandBottom = getY(7);
+
+        let html = `
+          <defs>
+            <linearGradient id="sleepAreaGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#a855f7" stop-opacity="0.42" />
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0" />
+            </linearGradient>
+            <linearGradient id="sleepStrokeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c084fc" />
+              <stop offset="50%" stop-color="#a855f7" />
+              <stop offset="100%" stop-color="#38bdf8" />
+            </linearGradient>
+          </defs>
+
+          <!-- 7~9小时黄金睡眠带 -->
+          <rect x="${pad.left}" y="${bandTop}" width="${plotW}" height="${bandBottom - bandTop}"
+            fill="rgba(16, 185, 129, 0.08)" />
+        `;
+
+        // Y 轴网格线 (4h - 10h)
+        [4, 5.5, 7, 8.5, 10].forEach(val => {
+          const y = getY(val);
+          html += `
+            <line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}"
+              stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="${val === 4 ? 'none' : '4 4'}" />
+            <text x="${pad.left - 10}" y="${y + 4}" text-anchor="end"
+              fill="#64748b" font-size="11">${val}h</text>
+          `;
+        });
+
+        // 曲线填充与折线本体
+        html += `
+          <path d="${areaPath}" fill="url(#sleepAreaGrad)" />
+          <path d="${linePath}" fill="none" stroke="url(#sleepStrokeGrad)" stroke-width="3.2" stroke-linecap="round" />
+        `;
+
+        // 绘制节点与星期坐标
+        points.forEach((pt, idx) => {
+          html += `
+            <g class="sleep-point-group" data-idx="${idx}">
+              <line x1="${pt.x}" y1="${pt.y}" x2="${pt.x}" y2="${pad.top + plotH}"
+                stroke="rgba(168, 85, 247, 0.2)" stroke-dasharray="2 3" />
+              <circle class="sleep-node" cx="${pt.x}" cy="${pt.y}" r="5.5"
+                fill="#090d16" stroke="#c084fc" stroke-width="3" />
+              <text x="${pt.x}" y="${pt.y - 12}" text-anchor="middle"
+                fill="#e2e8f0" font-size="11" font-weight="600">${pt.total}h</text>
+              <text x="${pt.x}" y="${height - 10}" text-anchor="middle"
+                fill="#94a3b8" font-size="12" font-weight="500">${DAYS[idx]}</text>
+              <circle cx="${pt.x}" cy="${pt.y}" r="22" fill="transparent" style="cursor:pointer" />
+            </g>
+          `;
+        });
+
+        svg.innerHTML = html;
+
+        // 绑定折线节点 Tooltip
+        svg.querySelectorAll('.sleep-point-group').forEach(group => {
+          const idx = Number(group.getAttribute('data-idx'));
+          const item = sleepData[idx];
+          const lightSleep = (item.total - item.deep).toFixed(1);
+
+          const content = `
+            <div class="tt-title" style="color:#c084fc">${DAYS[idx]} · 睡眠监测</div>
+            <div class="tt-row"><span>睡眠总时长</span><span class="tt-val">${item.total} 小时</span></div>
+            <div class="tt-row"><span>深睡 / 浅睡</span><span class="tt-val">${item.deep}h / ${lightSleep}h</span></div>
+            <div class="tt-row"><span>睡眠质量评分</span><span class="tt-val" style="color:#34d399">${item.score} 分</span></div>
+          `;
+
+          group.addEventListener('mouseenter', e => showTooltip(e, content));
+          group.addEventListener('mousemove', moveTooltip);
+          group.addEventListener('mouseleave', hideTooltip);
+          group.addEventListener('touchstart', e => showTooltip(e, content), { passive: true });
+        });
+      }
+
+      // 3. 渲染本周运动时长多段环形图 (原生 SVG)
+      function renderWorkoutRingChart(workouts) {
+        const svg = document.getElementById('workoutRingSvg');
+        const listEl = document.getElementById('workoutLegendList');
+        const cx = 130;
+        const cy = 130;
+        const r = 96;
+        const circumference = 2 * Math.PI * r;
+        const totalMins = workouts.reduce((acc, cur) => acc + cur.mins, 0);
+        const gapAngleLen = 7; // 每段之间的留白弧长
+
+        // 更新中心默认显示
+        const resetCenterInfo = () => {
+          document.getElementById('ringCenterTitle').textContent = '本周总运动';
+          document.getElementById('ringCenterVal').innerHTML = `${totalMins}<small style="font-size:0.9rem;font-weight:500;">分</small>`;
+          const pct = Math.round((totalMins / 300) * 100);
+          document.getElementById('ringCenterSub').textContent = `目标完成 ${pct}%`;
+        };
+        resetCenterInfo();
+
+        let svgHtml = `
+          <!-- 底层暗色轨道环 -->
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none"
+            stroke="rgba(255, 255, 255, 0.05)" stroke-width="18" />
+          <!-- 内侧科技刻度虚线环 -->
+          <circle cx="${cx}" cy="${cy}" r="${r - 22}" fill="none"
+            stroke="rgba(56, 189, 248, 0.16)" stroke-width="1" stroke-dasharray="3 6" />
+        `;
+
+        let accumulatedLen = 0;
+        workouts.forEach((item, idx) => {
+          const rawLen = (item.mins / totalMins) * circumference;
+          const segLen = Math.max(4, rawLen - gapAngleLen);
+          const dashArray = `${segLen} ${circumference - segLen}`;
+          const dashOffset = -(accumulatedLen);
+          accumulatedLen += rawLen;
+
+          svgHtml += `
+            <circle class="ring-segment" data-idx="${idx}"
+              cx="${cx}" cy="${cy}" r="${r}" fill="none"
+              stroke="${item.color}" stroke-width="18" stroke-linecap="round"
+              stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}"
+              transform="rotate(-90 ${cx} ${cy})" />
+          `;
+        });
+
+        svg.innerHTML = svgHtml;
+
+        // 渲染下方运动分类明细列表
+        listEl.innerHTML = workouts.map((item, idx) => {
+          const pct = Math.round((item.mins / totalMins) * 100);
+          return `
+            <div class="workout-item" data-idx="${idx}">
+              <div class="workout-item-top">
+                <span class="workout-name">
+                  <i class="workout-dot" style="background:${item.color}; box-shadow: 0 0 8px ${item.color}"></i>
+                  ${item.name}
+                </span>
+                <span class="workout-mins">${item.mins} 分钟 <span>(${pct}% · ${item.kcal}千卡)</span></span>
+              </div>
+              <div class="workout-bar-track">
+                <div class="workout-bar-fill" style="width:${pct}%; background:${item.color};"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // 环形图与列表联动高亮
+        function highlightSegment(idx, evt) {
+          const item = workouts[idx];
+          const pct = Math.round((item.mins / totalMins) * 100);
+          document.getElementById('ringCenterTitle').textContent = item.name;
+          document.getElementById('ringCenterVal').innerHTML = `${item.mins}<small style="font-size:0.9rem;font-weight:500;">分</small>`;
+          document.getElementById('ringCenterSub').textContent = `占比 ${pct}% · ${item.kcal}千卡`;
+
+          if (evt) {
+            const content = `
+              <div class="tt-title" style="color:${item.color}">${item.name}</div>
+              <div class="tt-row"><span>累计时长</span><span class="tt-val">${item.mins} 分钟 (${pct}%)</span></div>
+              <div class="tt-row"><span>热量消耗</span><span class="tt-val">${item.kcal} 千卡</span></div>
+            `;
+            showTooltip(evt, content);
+          }
+        }
+
+        svg.querySelectorAll('.ring-segment').forEach(seg => {
+          const idx = Number(seg.getAttribute('data-idx'));
+          seg.addEventListener('mouseenter', e => highlightSegment(idx, e));
+          seg.addEventListener('mousemove', moveTooltip);
+          seg.addEventListener('mouseleave', () => {
+            resetCenterInfo();
+            hideTooltip();
+          });
+          seg.addEventListener('touchstart', e => highlightSegment(idx, e), { passive: true });
+        });
+
+        listEl.querySelectorAll('.workout-item').forEach(row => {
+          const idx = Number(row.getAttribute('data-idx'));
+          row.addEventListener('mouseenter', () => highlightSegment(idx, null));
+          row.addEventListener('mouseleave', resetCenterInfo);
+        });
+      }
+
+      // 统一渲染入口
+      function renderAll(data) {
+        renderKPIs(data);
+        renderStepsBarChart(data.steps);
+        renderSleepLineChart(data.sleep);
+        renderWorkoutRingChart(data.workouts);
+      }
+
+      // 绑定周期切换按钮
+      document.querySelectorAll('.seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activePeriod = btn.getAttribute('data-period');
+          renderAll(DATASETS[activePeriod]);
+        });
+      });
+
+      // 绑定随机模拟数据按钮
+      document.getElementById('btnRandomize').addEventListener('click', () => {
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const simulated = {
+          steps: Array.from({ length: 7 }, () => randInt(6800, 15400)),
+          sleep: Array.from({ length: 7 }, () => {
+            const total = Number((Math.random() * 2.8 + 6.1).toFixed(1));
+            const deep = Number((total * (Math.random() * 0.08 + 0.25)).toFixed(1));
+            const score = Math.min(98, Math.round(60 + total * 4.2));
+            return { total, deep, score };
+          }),
+          workouts: [
+            { name: '有氧耐力跑', mins: randInt(75, 145), kcal: randInt(700, 1250), color: '#00f2fe' },
+            { name: '力量抗阻训练', mins: randInt(60, 120), kcal: randInt(500, 880), color: '#a855f7' },
+            { name: 'HIIT 高强燃脂', mins: randInt(35, 80), kcal: randInt(380, 720), color: '#10b981' },
+            { name: '核心与柔韧拉伸', mins: randInt(30, 65), kcal: randInt(140, 260), color: '#f59e0b' }
+          ],
+          heartRate: randInt(54, 65),
+          hrv: randInt(62, 86),
+          spo2: 99
+        };
+        DATASETS[activePeriod] = simulated;
+        renderAll(simulated);
+      });
+
+      // 点击空白区域关闭移动端 Tooltip
+      document.addEventListener('touchstart', e => {
+        if (!e.target.closest('.bar-group, .sleep-point-group, .ring-segment')) {
+          hideTooltip();
+        }
+      }, { passive: true });
+
+      initDateHeader();
+      renderAll(DATASETS.current);
+    })();
+  </script>
+</body>
+</html>
