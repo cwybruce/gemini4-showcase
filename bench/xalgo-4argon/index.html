@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X 平台爆款帖子诞生全链路 · 3D & SVG 架构推演 (xai-org/x-algorithm)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#05070B',
+                        panel: '#0B0F17',
+                        borderTech: '#1E293B',
+                        cyanGlow: '#00F0FF',
+                        violetGlow: '#8B5CF6',
+                        emeraldGlow: '#10B981',
+                        roseGlow: '#F43F5E',
+                        amberGlow: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background-color: #05070B;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070A10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E293B;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F0FF;
+        }
+
+        /* Cyber Glass & Neon Borders */
+        .cyber-panel {
+            background: rgba(11, 15, 23, 0.85);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(30, 41, 59, 0.9);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        }
+        .cyber-border-cyan {
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 0 18px rgba(0, 240, 255, 0.12);
+        }
+        .cyber-border-violet {
+            border-color: rgba(139, 92, 246, 0.45);
+            box-shadow: 0 0 18px rgba(139, 92, 246, 0.12);
+        }
+
+        /* SVG Data Packet Animation */
+        @keyframes dashFlow {
+            to {
+                stroke-dashoffset: -40;
+            }
+        }
+        .svg-flow-line {
+            stroke-dasharray: 6 6;
+            animation: dashFlow 1.2s linear infinite;
+        }
+        .svg-flow-fast {
+            stroke-dasharray: 8 4;
+            animation: dashFlow 0.55s linear infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.06); }
+        }
+        .pulse-node {
+            animation: pulseGlow 2.4s ease-in-out infinite;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+
+        /* Custom Range Input */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 3px;
+            background: #1E293B;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #00F0FF;
+            margin-top: -5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00F0FF;
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Grid Background Overlay */
+        .bg-tech-grid {
+            background-image: 
+                linear-gradient(to right, rgba(30, 41, 59, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(30, 41, 59, 0.2) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans bg-obsidian text-slate-100 selection:bg-cyanGlow selection:text-obsidian">
+
+    <!-- ==================== TOP TELEMETRY HEADER ==================== -->
+    <header class="cyber-panel sticky top-0 z-40 px-4 py-2.5 border-b border-slate-800/90">
+        <div class="max-w-[1920px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand & Repo Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-slate-900 border border-cyan-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                    <span class="font-mono font-extrabold text-lg text-white tracking-tighter">𝕏</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-bold text-sm sm:text-base tracking-tight text-white">
+                            X 平台爆款帖子诞生全链路 · 3D & SVG 架构推演
+                        </h1>
+                        <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 rounded-full">
+                            <i class="fa-brands fa-github text-[10px]"></i> xai-org/x-algorithm (2026 Grok/Rust)
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono">
+                        Home Mixer (Rust) · Thunder 内存库 · Grox 多模态 · Phoenix 双塔与自定义掩码 Transformer
+                    </p>
+                </div>
+            </div>
+
+            <!-- Live Telemetry Counters -->
+            <div class="flex items-center flex-wrap gap-2 sm:gap-4">
+                <div class="px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-800 flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                    <div>
+                        <div class="text-[10px] font-mono uppercase text-slate-400">实时曝光量 (Impressions)</div>
+                        <div id="hud-impressions" class="font-mono font-bold text-sm sm:text-base text-emerald-400">1,240,580</div>
+                    </div>
+                </div>
+
+                <div class="px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <div class="text-[10px] font-mono uppercase text-slate-400">WeightedScorer 综合得分</div>
+                    <div class="flex items-baseline gap-1.5">
+                        <span id="hud-score" class="font-mono font-bold text-sm sm:text-base text-cyan-400">84.6</span>
+                        <span id="hud-viral-tier" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">现象级爆款</span>
+                    </div>
+                </div>
+
+                <div class="hidden xl:block px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <div class="text-[10px] font-mono uppercase text-slate-400">管线端到端耗时 (SLA)</div>
+                    <div class="font-mono font-bold text-sm text-violet-400">1,142 ms <span class="text-[10px] text-slate-500">/ 1500ms</span></div>
+                </div>
+
+                <!-- Preset Post Templates -->
+                <div class="flex items-center bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
+                    <button onclick="applyPreset('viral')" id="preset-viral" class="px-2.5 py-1 rounded-md font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
+                        🔥 深度爆款帖
+                    </button>
+                    <button onclick="applyPreset('normal')" id="preset-normal" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
+                        📄 普通日常帖
+                    </button>
+                    <button onclick="applyPreset('ragebait')" id="preset-ragebait" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-rose-300 transition">
+                        ⚠️ 外链/引战降权帖
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN WORKSPACE (LEFT 3D/SVG + RIGHT CONTROLS) ==================== -->
+    <main class="flex-1 max-w-[1920px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-3 p-3">
+
+        <!-- LEFT / CENTER VIEWPORT (8 COLUMNS ON DESKTOP) -->
+        <section class="lg:col-span-8 flex flex-col gap-3">
+            
+            <!-- 3D WebGL Interactive Stage Card -->
+            <div class="relative cyber-panel rounded-xl overflow-hidden flex-1 min-h-[430px] sm:min-h-[500px] flex flex-col justify-between border border-slate-800">
+                
+                <!-- 3D Canvas Container -->
+                <div id="canvas-container" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing bg-tech-grid"></div>
+
+                <!-- Top Floating HUD Overlay inside 3D Viewport -->
+                <div class="relative z-10 p-3 sm:p-4 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
+                    <!-- Active Stage Floating Badge -->
+                    <div class="cyber-panel px-3.5 py-2.5 rounded-xl border-l-4 border-l-cyan-400 max-w-lg pointer-events-auto">
+                        <div class="flex items-center gap-2">
+                            <span id="stage-badge-num" class="px-2 py-0.5 text-[11px] font-mono font-bold bg-cyan-500/20 text-cyan-300 rounded border border-cyan-500/30">
+                                STAGE 01 / 06
+                            </span>
+                            <span id="stage-rust-path" class="text-[11px] font-mono text-slate-400">
+                                grox/multimodal_ingest.py
+                            </span>
+                        </div>
+                        <h2 id="stage-title" class="text-base sm:text-lg font-bold text-white mt-1">
+                            发布与多模态特征解析 (Ingest & Grox VLM/ASR)
+                        </h2>
+                        <p id="stage-subtitle" class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                            帖子发布瞬间，Grox 视觉与语音大模型实时扫描文本、图像与视频音轨，生成高维语义向量并筛查外链与垃圾引战特征。
+                        </p>
+                    </div>
+
+                    <!-- Camera & Visual Mode Controls -->
+                    <div class="flex flex-col gap-1.5 items-end pointer-events-auto">
+                        <div class="cyber-panel p-1 rounded-lg flex items-center gap-1 text-xs font-mono">
+                            <button onclick="setCameraView('default')" class="px-2.5 py-1 rounded hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition" title="默认透视视角">
+                                <i class="fa-solid fa-cube mr-1"></i>透视
+                            </button>
+                            <button onclick="setCameraView('top')" class="px-2.5 py-1 rounded hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition" title="俯视拓扑视角">
+                                <i class="fa-solid fa-compass mr-1"></i>俯视
+                            </button>
+                            <button onclick="setCameraView('closeup')" class="px-2.5 py-1 rounded hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition" title="核心节点特写">
+                                <i class="fa-solid fa-magnifying-glass-plus mr-1"></i>特写
+                            </button>
+                        </div>
+                        <div class="text-[11px] font-mono text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800/80">
+                            <i class="fa-solid fa-computer-mouse text-cyan-400 mr-1"></i>拖拽旋转 3D 空间 · 滚轮缩放
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Legend & Bottom Stage Timeline Bar -->
+                <div class="relative z-10 p-3 sm:p-4 flex flex-col gap-2.5 bg-gradient-to-t from-obsidian via-obsidian/90 to-transparent">
+                    <!-- Color Legend -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-300">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00F0FF]"></span>Thunder 关注圈内存流</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-violet-400 shadow-[0_0_8px_#8B5CF6]"></span>Grox / Phoenix 神经网络</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]"></span>高权重深度互动脉冲</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#F59E0B]"></span>SimClusters 破圈社区球</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_#F43F5E]"></span>负反馈/掩码阻断</span>
+                        </div>
+                        <div id="3d-node-telemetry" class="text-cyan-300">
+                            粒子流速率: <span id="telemetry-velocity">2.4x</span> | 活跃社区簇: <span id="telemetry-clusters">5 / 5</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive 6-Stage Stepper Bar -->
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5">
+                        <button onclick="selectStage(0)" id="stage-btn-0" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-cyan-950/50 border-cyan-400">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-cyan-300">
+                                <span>01. INGEST</span>
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-white truncate mt-0.5">Grox 多模态解析</div>
+                        </button>
+                        <button onclick="selectStage(1)" id="stage-btn-1" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span>02. THUNDER</span>
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-300 truncate mt-0.5">关注圈冷启动</div>
+                        </button>
+                        <button onclick="selectStage(2)" id="stage-btn-2" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span>03. IGNITION</span>
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-300 truncate mt-0.5">深度互动回流</div>
+                        </button>
+                        <button onclick="selectStage(3)" id="stage-btn-3" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span>04. RETRIEVAL</span>
+                                <i class="fa-solid fa-tower-broadcast"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-300 truncate mt-0.5">双塔与社区破圈</div>
+                        </button>
+                        <button onclick="selectStage(4)" id="stage-btn-4" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span>05. PHOENIX</span>
+                                <i class="fa-solid fa-table-cells"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-300 truncate mt-0.5">Grok 掩码排序</div>
+                        </button>
+                        <button onclick="selectStage(5)" id="stage-btn-5" class="stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700">
+                            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                                <span>06. SUPERNOVA</span>
+                                <i class="fa-solid fa-rocket"></i>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-300 truncate mt-0.5">指数级引爆与衰减</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM SVG ARCHITECTURE & ATTENTION MASK INSPECTOR -->
+            <div class="cyber-panel rounded-xl p-3.5 border border-slate-800">
+                <!-- SVG Inspector Tabs -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-5 rounded bg-cyan-400"></span>
+                        <h3 class="font-bold text-sm text-white">SVG 矢量架构与算法矩阵透视镜</h3>
+                        <span class="text-[11px] font-mono text-slate-400 hidden sm:inline">实时同步阶段状态与调参结果</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
+                        <button onclick="switchSvgTab('pipeline')" id="svg-tab-pipeline" class="px-3 py-1 rounded-md font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
+                            1. Home Mixer 全链路数据流 SVG
+                        </button>
+                        <button onclick="switchSvgTab('attention')" id="svg-tab-attention" class="px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
+                            2. Phoenix 自定义 Attention Mask 矩阵
+                        </button>
+                        <button onclick="switchSvgTab('curve')" id="svg-tab-curve" class="px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
+                            3. 流量跃迁与多样性衰减曲线
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 1: FULL PIPELINE ANIMATED SVG -->
+                <div id="svg-panel-pipeline" class="w-full overflow-x-auto">
+                    <svg viewBox="0 0 1000 230" class="w-full h-auto min-w-[760px] select-none">
+                        <defs>
+                            <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.2" />
+                                <stop offset="100%" stop-color="#00F0FF" stop-opacity="0.9" />
+                            </linearGradient>
+                            <linearGradient id="violetGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.2" />
+                                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.9" />
+                            </linearGradient>
+                            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+
+                        <!-- Background Grid lines -->
+                        <g stroke="#1E293B" stroke-width="0.5" opacity="0.5">
+                            <line x1="0" y1="40" x2="1000" y2="40" />
+                            <line x1="0" y1="115" x2="1000" y2="115" />
+                            <line x1="0" y1="190" x2="1000" y2="190" />
+                        </g>
+
+                        <!-- Animated Connecting Paths -->
+                        <!-- Post -> Grox -->
+                        <path d="M 120 115 L 205 115" stroke="#00F0FF" stroke-width="2.5" fill="none" class="svg-flow-line" />
+                        <!-- Grox -> Thunder (Top) -->
+                        <path d="M 325 100 C 365 100, 370 55, 415 55" stroke="#00F0FF" stroke-width="2.5" fill="none" class="svg-flow-line" />
+                        <!-- Grox -> Phoenix Two-Tower (Bottom) -->
+                        <path d="M 325 130 C 365 130, 370 175, 415 175" stroke="#8B5CF6" stroke-width="2.5" fill="none" class="svg-flow-line" />
+                        <!-- Feedback loop from Engagement to Two-Tower -->
+                        <path id="svg-feedback-loop" d="M 555 55 C 585 55, 585 175, 555 175" stroke="#10B981" stroke-width="2" stroke-dasharray="4 4" fill="none" class="svg-flow-fast" />
+                        <!-- Thunder & Phoenix -> Home Mixer Filter -->
+                        <path d="M 555 55 C 600 55, 605 105, 640 105" stroke="#00F0FF" stroke-width="2.5" fill="none" class="svg-flow-line" />
+                        <path d="M 555 175 C 600 175, 605 125, 640 125" stroke="#F59E0B" stroke-width="2.5" fill="none" class="svg-flow-line" />
+                        <!-- Home Mixer -> Phoenix Ranker -->
+                        <path d="M 765 115 L 835 115" stroke="#10B981" stroke-width="3" fill="none" class="svg-flow-fast" />
+
+                        <!-- NODE 1: Post Ingest -->
+                        <g id="svg-node-0" class="cursor-pointer" onclick="selectStage(0)">
+                            <rect x="15" y="75" width="105" height="80" rx="10" fill="#0F172A" stroke="#00F0FF" stroke-width="2" />
+                            <text x="67" y="102" fill="#00F0FF" font-size="11" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">01. NEW POST</text>
+                            <text x="67" y="122" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">原帖发布</text>
+                            <text x="67" y="140" fill="#94A3B8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">Text + Video/Img</text>
+                        </g>
+
+                        <!-- NODE 2: Grox VLM / ASR -->
+                        <g id="svg-node-1" class="cursor-pointer" onclick="selectStage(0)">
+                            <rect x="205" y="70" width="120" height="90" rx="10" fill="#0F172A" stroke="#8B5CF6" stroke-width="2" />
+                            <text x="265" y="95" fill="#A78BFA" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">GROX VLM/ASR</text>
+                            <text x="265" y="115" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">多模态内容理解</text>
+                            <text x="265" y="133" fill="#94A3B8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">Topic / Sentiment</text>
+                            <text id="svg-grox-status" x="265" y="148" fill="#10B981" font-size="9" font-family="JetBrains Mono" text-anchor="middle">✓ 安全与质量校验通过</text>
+                        </g>
+
+                        <!-- NODE 3: Thunder In-Memory Store (In-Network) -->
+                        <g id="svg-node-2" class="cursor-pointer" onclick="selectStage(1)">
+                            <rect x="415" y="15" width="140" height="80" rx="10" fill="#0F172A" stroke="#00F0FF" stroke-width="2" />
+                            <text x="485" y="38" fill="#00F0FF" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">02. THUNDER (Rust)</text>
+                            <text x="485" y="56" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">关注圈实时内存池</text>
+                            <text x="485" y="73" fill="#94A3B8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">DashMap &lt;1ms 极速召回</text>
+                            <text x="485" y="87" fill="#38BDF8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">48h 存活窗口 | 粉丝测试池</text>
+                        </g>
+
+                        <!-- NODE 4: Phoenix Two-Tower & SimClusters (Out-of-Network) -->
+                        <g id="svg-node-3" class="cursor-pointer" onclick="selectStage(3)">
+                            <rect x="415" y="135" width="140" height="80" rx="10" fill="#0F172A" stroke="#F59E0B" stroke-width="2" />
+                            <text x="485" y="158" fill="#FBBF24" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">04. PHOENIX + SIMCLUSTERS</text>
+                            <text x="485" y="176" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">全网双塔向量破圈</text>
+                            <text x="485" y="193" fill="#94A3B8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">User Tower ⊗ Post ANN</text>
+                            <text x="485" y="207" fill="#FBBF24" font-size="9" font-family="JetBrains Mono" text-anchor="middle">14.5万兴趣社区矩阵共振</text>
+                        </g>
+
+                        <!-- Engagement Ignition Badge in middle -->
+                        <g class="cursor-pointer" onclick="selectStage(2)">
+                            <rect x="435" y="101" width="100" height="28" rx="6" fill="#064E3B" stroke="#10B981" stroke-width="1.5" />
+                            <text x="485" y="119" fill="#34D399" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">03. 深度互动点火</text>
+                        </g>
+
+                        <!-- NODE 5: Home Mixer & Phoenix Grok Ranker -->
+                        <g id="svg-node-4" class="cursor-pointer" onclick="selectStage(4)">
+                            <rect x="640" y="65" width="125" height="100" rx="10" fill="#0F172A" stroke="#8B5CF6" stroke-width="2" />
+                            <text x="702" y="88" fill="#C4B5FD" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">05. PHOENIX RANKER</text>
+                            <text x="702" y="107" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">Grok 掩码排序器</text>
+                            <text x="702" y="124" fill="#94A3B8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">1,500 候选帖同批推理</text>
+                            <text x="702" y="139" fill="#A78BFA" font-size="9" font-family="JetBrains Mono" text-anchor="middle">预测 19 种行为概率 P(A)</text>
+                            <text x="702" y="154" fill="#38BDF8" font-size="9" font-family="JetBrains Mono" text-anchor="middle">Custom Attention Mask</text>
+                        </g>
+
+                        <!-- NODE 6: WeightedScorer & Viral Feed Output -->
+                        <g id="svg-node-5" class="cursor-pointer" onclick="selectStage(5)">
+                            <rect x="835" y="65" width="150" height="100" rx="10" fill="#0F172A" stroke="#10B981" stroke-width="2.5" filter="url(#neonGlow)" />
+                            <text x="910" y="88" fill="#34D399" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">06. WEIGHTED SCORER</text>
+                            <text x="910" y="108" fill="#F8FAFC" font-size="12" font-weight="bold" text-anchor="middle">For You 信息流引爆</text>
+                            <text id="svg-live-score" x="910" y="130" fill="#00F0FF" font-size="13" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">Score: 84.6</text>
+                            <text id="svg-live-reach" x="910" y="150" fill="#10B981" font-size="10" font-family="JetBrains Mono" text-anchor="middle">触达: 1.24M+ 曝光</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- TAB 2: CUSTOM ATTENTION MASK MATRIX VISUALIZER -->
+                <div id="svg-panel-attention" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-7 flex flex-col items-center">
+                            <svg viewBox="0 0 520 220" class="w-full max-w-[520px] h-auto">
+                                <!-- Matrix Labels -->
+                                <text x="155" y="16" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">Key: 用户历史互动序列 (User Context)</text>
+                                <text x="355" y="16" fill="#94A3B8" font-size="10" font-family="JetBrains Mono">Key: 候选帖子 (Candidates 1..K)</text>
+                                
+                                <!-- Row Labels -->
+                                <text x="10" y="52" fill="#38BDF8" font-size="10" font-family="JetBrains Mono">User Hist [1..N]</text>
+                                <text x="10" y="102" fill="#C4B5FD" font-size="10" font-family="JetBrains Mono">Candidate Post 1</text>
+                                <text x="10" y="137" fill="#00F0FF" font-size="10" font-family="JetBrains Mono" font-weight="bold">★ 当前爆款候选帖</text>
+                                <text x="10" y="172" fill="#C4B5FD" font-size="10" font-family="JetBrains Mono">Candidate Post 3</text>
+                                <text x="10" y="205" fill="#C4B5FD" font-size="10" font-family="JetBrains Mono">Candidate Post K</text>
+
+                                <!-- Left Block: Attend to User Context (ACTIVE) -->
+                                <g>
+                                    <rect x="130" y="28" width="195" height="36" rx="4" fill="#0284C7" fill-opacity="0.35" stroke="#00F0FF" stroke-width="1.5"/>
+                                    <text x="227" y="50" fill="#E0F2FE" font-size="10" font-family="JetBrains Mono" text-anchor="middle">1 (Causal User Context)</text>
+
+                                    <rect x="130" y="80" width="195" height="135" rx="4" fill="#10B981" fill-opacity="0.25" stroke="#10B981" stroke-width="1.5"/>
+                                    <!-- Highlight Row for Viral Candidate -->
+                                    <rect x="132" y="118" width="191" height="28" fill="#00F0FF" fill-opacity="0.35" />
+                                    <text x="227" y="136" fill="#FFFFFF" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">1 1 1 1 (读取用户兴趣序列)</text>
+                                    <text x="227" y="102" fill="#6EE7B7" font-size="10" font-family="JetBrains Mono" text-anchor="middle">1 1 1 1 (Active Attention)</text>
+                                    <text x="227" y="172" fill="#6EE7B7" font-size="10" font-family="JetBrains Mono" text-anchor="middle">1 1 1 1 (Active Attention)</text>
+                                    <text x="227" y="203" fill="#6EE7B7" font-size="10" font-family="JetBrains Mono" text-anchor="middle">1 1 1 1 (Active Attention)</text>
+                                </g>
+
+                                <!-- Top Right Block: User Hist to Candidates (BLOCKED) -->
+                                <g>
+                                    <rect x="335" y="28" width="175" height="36" rx="4" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+                                    <text x="422" y="50" fill="#64748B" font-size="10" font-family="JetBrains Mono" text-anchor="middle">0 (Masked)</text>
+                                </g>
+
+                                <!-- Bottom Right Block: Candidate-to-Candidate Diagonal Only -->
+                                <g>
+                                    <rect x="335" y="80" width="175" height="135" rx="4" fill="#1E1B4B" fill-opacity="0.4" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="4 3"/>
+                                    <!-- Diagonal Self-Attention Squares -->
+                                    <rect x="342" y="85" width="36" height="26" rx="3" fill="#8B5CF6" stroke="#C4B5FD" />
+                                    <text x="360" y="102" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="middle">Self</text>
+
+                                    <rect x="384" y="118" width="36" height="26" rx="3" fill="#00F0FF" stroke="#FFF" stroke-width="1.5" />
+                                    <text x="402" y="135" fill="#05070B" font-size="10" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">Self</text>
+
+                                    <rect x="426" y="151" width="36" height="26" rx="3" fill="#8B5CF6" stroke="#C4B5FD" />
+                                    <text x="444" y="168" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="middle">Self</text>
+
+                                    <rect x="468" y="184" width="36" height="26" rx="3" fill="#8B5CF6" stroke="#C4B5FD" />
+                                    <text x="486" y="201" fill="#FFF" font-size="10" font-family="JetBrains Mono" text-anchor="middle">Self</text>
+
+                                    <!-- Off-diagonal Zeros -->
+                                    <text x="445" y="103" fill="#F43F5E" font-size="10" font-family="JetBrains Mono">0  0  0 (互不干扰)</text>
+                                    <text x="360" y="168" fill="#F43F5E" font-size="10" font-family="JetBrains Mono">0  0</text>
+                                    <text x="380" y="201" fill="#F43F5E" font-size="10" font-family="JetBrains Mono">0  0  0</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="md:col-span-5 text-xs space-y-2.5 text-slate-300 bg-slate-900/70 p-3.5 rounded-lg border border-slate-800">
+                            <div class="font-mono text-cyan-400 font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-code"></i> phoenix/grok_transformer_ranker.py
+                            </div>
+                            <p class="leading-relaxed">
+                                <strong class="text-white">为什么 X 要设计自定义 Attention Mask？</strong><br>
+                                在传统的 Transformer 中，如果把 1,500 条候选帖子放进同一个序列推理，帖子 A 的得分会受到同批次帖子 B 的干扰，且计算复杂度呈 $O(K^2)$ 爆炸。
+                            </p>
+                            <p class="leading-relaxed">
+                                <strong class="text-emerald-400">核心突破：候选隔离掩码 (Candidate Isolation)</strong><br>
+                                如左图矩阵所示，每条候选帖只能 Attend（关注）<strong>用户历史互动序列 (绿区=1)</strong> 与 <strong>候选帖自身特征 (对角线=Self)</strong>，候选帖之间的交叉注意力全部置零 (<span class="text-rose-400 font-mono">0</span>)。这样既能单次前向传播并行输出 19 种互动概率，又保证了每条帖子打分的绝对独立与缓存复用！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: VIRAL GROWTH & DECAY CURVE SVG -->
+                <div id="svg-panel-curve" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        <div class="md:col-span-8">
+                            <svg viewBox="0 0 600 200" class="w-full h-auto">
+                                <!-- Axes -->
+                                <line x1="45" y1="175" x2="580" y2="175" stroke="#334155" stroke-width="1.5" />
+                                <line x1="45" y1="20" x2="45" y2="175" stroke="#334155" stroke-width="1.5" />
+                                
+                                <!-- Y Axis Labels -->
+                                <text x="38" y="30" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="end">1M+</text>
+                                <text x="38" y="80" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="end">100K</text>
+                                <text x="38" y="130" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="end">10K</text>
+                                <text x="38" y="172" fill="#64748B" font-size="9" font-family="JetBrains Mono" text-anchor="end">500</text>
+
+                                <!-- X Axis Labels -->
+                                <text x="60" y="192" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">0m (Thunder冷启)</text>
+                                <text x="190" y="192" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">30m (评论链点火)</text>
+                                <text x="330" y="192" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">4h (SimClusters破圈)</text>
+                                <text x="490" y="192" fill="#94A3B8" font-size="9" font-family="JetBrains Mono">24h-48h (Thunder过期衰减)</text>
+
+                                <!-- Threshold Line -->
+                                <line x1="45" y1="115" x2="580" y2="115" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4 4" />
+                                <text x="575" y="110" fill="#F59E0B" font-size="9" font-family="JetBrains Mono" text-anchor="end">Out-of-Network 破圈阈值</text>
+
+                                <!-- Dynamic Viral Curve Path -->
+                                <path id="svg-growth-curve" d="M 45 168 Q 140 160, 195 115 T 360 35 Q 460 25, 570 40" fill="none" stroke="#00F0FF" stroke-width="3.5" />
+                                <path id="svg-growth-area" d="M 45 168 Q 140 160, 195 115 T 360 35 Q 460 25, 570 40 L 570 175 L 45 175 Z" fill="url(#cyanGrad)" opacity="0.2" />
+
+                                <!-- Milestone Dots -->
+                                <circle id="curve-dot-1" cx="195" cy="115" r="5" fill="#10B981" stroke="#FFF" stroke-width="1.5" />
+                                <circle id="curve-dot-2" cx="360" cy="35" r="6" fill="#00F0FF" stroke="#FFF" stroke-width="2" class="pulse-node" />
+                            </svg>
+                        </div>
+                        <div class="md:col-span-4 text-xs space-y-2 text-slate-300 bg-slate-900/70 p-3.5 rounded-lg border border-slate-800">
+                            <div class="font-mono text-amber-400 font-bold">生命周期三大铁律：</div>
+                            <p>1. <strong>黄金前 30 分钟</strong>：能否在 Thunder 关注池中拿到作者回复评论链（Reply Chain）与高收藏，决定能否跨越黄线进入全网召回池。</p>
+                            <p>2. <strong>作者多样性衰减 (Author Diversity Decay)</strong>：同一账号日内连发多帖，后续帖子得分按指数打折，避免刷屏霸榜。</p>
+                            <p>3. <strong>48 小时内存硬淘汰</strong>：Thunder 仅缓存 48 小时内新帖，超时后自动移出实时推荐流。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT CONTROL PANEL: STAGE BREAKDOWN & VIRAL SCORER LAB (4 COLUMNS ON DESKTOP) -->
+        <aside class="lg:col-span-4 flex flex-col gap-3">
+            
+            <!-- Stage Control & Technical Deep-Dive Card -->
+            <div class="cyber-panel rounded-xl p-4 border border-slate-800 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        <h3 class="font-bold text-sm text-white uppercase tracking-wider">阶段源码级解析</h3>
+                    </div>
+                    <!-- Auto-Play Tour Controls -->
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="prevStage()" class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-xs text-slate-300 transition" title="上一阶段">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button onclick="toggleAutoPlay()" id="autoplay-btn" class="px-3 h-7 rounded-lg bg-cyan-500/20 border border-cyan-500/50 hover:bg-cyan-500/30 flex items-center gap-1.5 text-xs font-mono text-cyan-300 transition">
+                            <i id="autoplay-icon" class="fa-solid fa-play text-[10px]"></i>
+                            <span id="autoplay-text">自动巡航推演</span>
+                        </button>
+                        <button onclick="nextStage()" class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-xs text-slate-300 transition" title="下一阶段">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Technical Specs Box -->
+                <div class="bg-slate-950/90 rounded-lg p-3 border border-slate-800/90 space-y-2">
+                    <div class="flex items-center justify-between text-xs font-mono">
+                        <span class="text-slate-400">核心模块:</span>
+                        <span id="detail-module" class="text-cyan-400 font-semibold">Grox VLM & Ingest Pipeline</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs font-mono">
+                        <span class="text-slate-400">关键数据结构:</span>
+                        <span id="detail-struct" class="text-violet-300">PostEmbedding (Dim=1024)</span>
+                    </div>
+                    <div class="pt-1.5 border-t border-slate-800/80 text-xs text-slate-300 leading-relaxed" id="detail-mechanism">
+                        当创作者点击发布，Grox 多模态模型立刻提取文本、图片与视频音轨特征。如果包含原生视频或长图文，基础质量分提升；若检测到纯外部导流链接或引战词汇，将直接附加负向偏置。
+                    </div>
+                    <div class="pt-1.5 flex items-start gap-2 text-xs text-amber-300 bg-amber-950/30 p-2 rounded border border-amber-500/20">
+                        <i class="fa-solid fa-key mt-0.5"></i>
+                        <div id="detail-tip">
+                            <strong>破圈关键：</strong>避免在主帖直接放外部链接（可放在评论区），确保垂直领域语义清晰，让 Grox 准确锚定初始受众簇。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE VIRAL LAB (WeightedScorer Sandbox) -->
+            <div class="cyber-panel rounded-xl p-4 border border-slate-800 flex-1 flex flex-col justify-between gap-3">
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-cyan-400 text-sm"></i>
+                            <h3 class="font-bold text-sm text-white">WeightedScorer 爆款调参实验室</h3>
+                        </div>
+                        <span class="text-[11px] font-mono text-slate-400">home-mixer/scorers/</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mb-3">
+                        实时调节 Phoenix 预测的各项互动概率 $P(\text{Action}_i)$，观察总分与 3D 粒子流如何引爆或坍缩：
+                    </p>
+
+                    <!-- Formula Display Box -->
+                    <div class="bg-slate-950 px-3 py-2 rounded-lg border border-slate-800 mb-3 font-mono text-[11px] flex items-center justify-between">
+                        <span class="text-slate-300">$\text{Score} = \sum w_i \cdot P(\text{Action}_i) - \text{Penalties}$</span>
+                        <span id="formula-live-result" class="text-cyan-400 font-bold text-xs">= +84.6</span>
+                    </div>
+
+                    <!-- Sliders List -->
+                    <div class="space-y-3">
+                        <!-- Signal 1: Author Reply Chain -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-emerald-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-comments text-[11px]"></i>作者回复评论互动链 $P(\text{Reply+Author})$
+                                </span>
+                                <span class="font-mono text-emerald-400"><span id="val-reply">78</span>% <span class="text-[10px] text-slate-500">(最高权重 w=75x)</span></span>
+                            </div>
+                            <input type="range" id="slider-reply" min="0" max="100" value="78" oninput="updateSimulation()" class="w-full">
+                        </div>
+
+                        <!-- Signal 2: Bookmark & Share -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-cyan-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bookmark text-[11px]"></i>私密收藏与转发率 $P(\text{Bookmark/Repost})$
+                                </span>
+                                <span class="font-mono text-cyan-400"><span id="val-bookmark">65</span>% <span class="text-[10px] text-slate-500">(高权重 w=20x)</span></span>
+                            </div>
+                            <input type="range" id="slider-bookmark" min="0" max="100" value="65" oninput="updateSimulation()" class="w-full">
+                        </div>
+
+                        <!-- Signal 3: Dwell Time & Video Completion -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-violet-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-hourglass-half text-[11px]"></i>长停留 &gt;30s 与完播率 $P(\text{Dwell})$
+                                </span>
+                                <span class="font-mono text-violet-400"><span id="val-dwell">82</span>% <span class="text-[10px] text-slate-500">(中权重 w=12x)</span></span>
+                            </div>
+                            <input type="range" id="slider-dwell" min="0" max="100" value="82" oninput="updateSimulation()" class="w-full">
+                        </div>
+
+                        <!-- Signal 4: Shallow Likes -->
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-heart text-[11px] text-slate-400"></i>浅层点赞概率 $P(\text{Favorite})$
+                                </span>
+                                <span class="font-mono text-slate-400"><span id="val-like">50</span>% <span class="text-[10px] text-slate-500">(基础权重 w=1x)</span></span>
+                            </div>
+                            <input type="range" id="slider-like" min="0" max="100" value="50" oninput="updateSimulation()" class="w-full">
+                        </div>
+
+                        <!-- Signal 5: Negative Feedback Probability -->
+                        <div class="pt-1 border-t border-slate-800/80">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-rose-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-ban text-[11px]"></i>预测负反馈概率 $P(\text{Mute/Block/Report})$
+                                </span>
+                                <span class="font-mono text-rose-400"><span id="val-negative">4</span>% <span class="text-[10px] text-slate-500">(重度惩罚 w=-369x)</span></span>
+                            </div>
+                            <input type="range" id="slider-negative" min="0" max="40" value="4" oninput="updateSimulation()" class="w-full">
+                        </div>
+
+                        <!-- Toggles: External Link & Rapid Burst Decay -->
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 border border-slate-800 cursor-pointer hover:border-rose-500/40 transition">
+                                <span class="text-[11px] text-slate-300">含外链导流惩罚</span>
+                                <input type="checkbox" id="toggle-link" onchange="updateSimulation()" class="accent-rose-500 w-4 h-4 rounded cursor-pointer">
+                            </label>
+                            <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/90 border border-slate-800 cursor-pointer hover:border-amber-500/40 transition">
+                                <span class="text-[11px] text-slate-300">高频连发衰减</span>
+                                <input type="checkbox" id="toggle-decay" onchange="updateSimulation()" class="accent-amber-500 w-4 h-4 rounded cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Score Contribution Bar Breakdown -->
+                <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-[11px] font-mono">
+                        <span class="text-slate-400">各信号对总分的贡献占比:</span>
+                        <span id="score-diagnosis" class="text-emerald-400">评论链与收藏驱动破圈</span>
+                    </div>
+                    <div class="w-full h-3 rounded-full bg-slate-900 overflow-hidden flex p-0.5 gap-0.5 border border-slate-800">
+                        <div id="bar-reply" class="h-full bg-emerald-400 rounded-l-full transition-all duration-300" style="width: 55%" title="评论互动链贡献"></div>
+                        <div id="bar-bookmark" class="h-full bg-cyan-400 transition-all duration-300" style="width: 22%" title="收藏与转发贡献"></div>
+                        <div id="bar-dwell" class="h-full bg-violet-400 transition-all duration-300" style="width: 18%" title="停留与完播贡献"></div>
+                        <div id="bar-like" class="h-full bg-slate-400 rounded-r-full transition-all duration-300" style="width: 5%" title="点赞贡献"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                        <span class="text-emerald-400">● 评论链</span>
+                        <span class="text-cyan-400">● 收藏转发</span>
+                        <span class="text-violet-400">● 深度停留</span>
+                        <span class="text-slate-400">● 浅层点赞</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- ==================== JAVASCRIPT: DATA, 3D ENGINE & INTERACTIVE LOGIC ==================== -->
+    <script>
+        // ============================================================================
+        // 1. STAGE DEFINITIONS (Based on xai-org/x-algorithm Architecture)
+        // ============================================================================
+        const STAGES = [
+            {
+                id: 0,
+                badge: "STAGE 01 / 06",
+                path: "grox/multimodal_ingest.py",
+                title: "阶段 01：发布与多模态特征解析 (Ingest & Grox VLM/ASR)",
+                subtitle: "帖子发布瞬间，Grox 视觉语言与语音识别模型实时解析文本、图片与视频音轨，生成高维语义嵌入并执行安全与外链检测。",
+                module: "Grox Multimodal VLM / ASR Pipeline",
+                struct: "PostEmbedding (bf16 Tensor, Dim=1024)",
+                mechanism: "不同于旧版依赖人工特征，新版算法通过 Grox 实时提取帖子的垂直领域分类（Topic）、内容深度分、情绪极性（Sentiment）以及垃圾/引战嫌疑度。若主帖带有跳出平台的外链，初始分发权重会被直接打折。",
+                tip: "破圈关键：原生视频或结构化长文能获得更高的 Grox 质量初评；外部链接务必放在评论区一楼而非主帖。",
+                camPos: { x: 0, y: 12, z: 34 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            },
+            {
+                id: 1,
+                badge: "STAGE 02 / 06",
+                path: "thunder/in_memory_store.rs",
+                title: "阶段 02：关注圈极速冷启动 (Thunder In-Memory Seed)",
+                subtitle: "帖子写入 Rust 编写的 Thunder 内存数据库（保留最近 48 小时），毫秒级推送给当前在线的活跃粉丝进行第一波种子测试。",
+                module: "Thunder (Rust DashMap + gRPC Service)",
+                struct: "InNetworkPostEntry (TTL = 48 Hours)",
+                mechanism: "Thunder 将全平台用户最近 48 小时的原帖、回复和转发常驻内存。当粉丝刷新信息流时，Home Mixer 在 1 毫秒内从 Thunder 拉取你的新帖，形成 500～2,000 人的初始冷启动测试池（Seed Pool）。",
+                tip: "破圈关键：发布后的前 30 分钟是黄金窗口，活跃粉丝的早期互动率直接决定帖子能否晋级到全网双塔召回。",
+                camPos: { x: 0, y: 22, z: 38 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            },
+            {
+                id: 2,
+                badge: "STAGE 03 / 06",
+                path: "home-mixer/scorers/weighted_scorer.rs",
+                title: "阶段 03：高权重深度互动触发 (High-Weight Signal Ignition)",
+                subtitle: "粉丝产生互动并回流。单纯点赞价值极低，而『作者回复评论形成互动链』、『私密收藏』与『长停留完播』会触发百倍级正反馈脉冲！",
+                module: "User Engagement Feedback Stream",
+                struct: "ActionProbabilityVector (19 Actions)",
+                mechanism: "在算法权重体系中，评论且得到作者回复（Reply Engaged by Author）的权重约为普通点赞的 75 倍以上，收藏（Bookmark）与深度停留（Dwell Time）紧随其后。高能互动脉冲会迅速刷新该帖的实时后验表征。",
+                tip: "破圈关键：发帖后 1 小时内，积极在评论区与读者有来有回地探讨，亲手制造『作者参与的评论链』，是撬动算法的最大杠杆！",
+                camPos: { x: -18, y: 15, z: 32 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            },
+            {
+                id: 3,
+                badge: "STAGE 04 / 06",
+                path: "phoenix/two_tower_retrieval.py",
+                title: "阶段 04：双塔向量破圈与社区共振 (Phoenix & SimClusters)",
+                subtitle: "种子池得分跨过阈值后，Phoenix 双塔模型与 SimClusters 兴趣社区矩阵将其拉入『未关注人群（Out-of-Network）』视野，实现跨圈层跃迁。",
+                module: "Phoenix Two-Tower ANN + SimClusters Matrix",
+                struct: "UserTower(Grok) ⊗ CandidateTower ANN",
+                mechanism: "Phoenix 召回引擎将全网用户的历史行为编码为 User 向量，在向量空间中检索高潜帖子；同时 SimClusters 利用 14.5 万个重叠兴趣社区矩阵，让帖子从『核心小圈子』逐级共振扩散到『泛科技圈』乃至『大众热门圈』。",
+                tip: "破圈关键：既有垂直专业深度、又具备普适共鸣议题的帖子，最容易在 SimClusters 社区球之间架起向量桥梁。",
+                camPos: { x: 24, y: 20, z: 42 },
+                lookAt: { x: 4, y: 0, z: 0 }
+            },
+            {
+                id: 4,
+                badge: "STAGE 05 / 06",
+                path: "phoenix/grok_transformer_ranker.py",
+                title: "阶段 05：Grok 终极掩码排序 (Phoenix Ranker & Custom Mask)",
+                subtitle: "1,500 条候选帖在 Home Mixer 中同台竞技。Phoenix 排序模型借助『自定义注意力掩码』单次推理预测 19 种行为概率并计算总分。",
+                module: "Phoenix Grok-based Transformer Ranker",
+                struct: "CustomAttentionMask [Batch, Context+K, Context+K]",
+                mechanism: "Phoenix 将用户的历史互动序列与 1,500 条候选帖打包输入 Grok Transformer。通过自定义 Attention Mask 屏蔽候选帖之间的横向干扰，单次前向传播预测当前用户对该帖点赞、回复、收藏或拉黑的概率，再由 WeightedScorer 加权求和。",
+                tip: "破圈关键：算法乘的是『当前读者发生该行为的预测概率』。哪怕有一万个赞，如果容易激发路人点举报或屏蔽，负权重也会瞬间清零得分。",
+                camPos: { x: 0, y: 8, z: 40 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            },
+            {
+                id: 5,
+                badge: "STAGE 06 / 06",
+                path: "home-mixer/blending_pipeline.rs",
+                title: "阶段 06：指数级引爆与生命周期衰减 (Viral Supernova & Decay)",
+                subtitle: "在千万级用户的 For You 信息流中胜出，曝光量呈指数级爆发！随后受作者多样性衰减与 48 小时内存窗口限制，逐步回归平稳。",
+                module: "Home Mixer Blending & Diversity Decay",
+                struct: "RankedFeedResponse (SLA < 1.5s)",
+                mechanism: "当帖子在全网各圈层都保持高预测分时，将形成正反馈飞轮，带来百万至千万级曝光。随后 Author Diversity Scorer 防止单账号刷屏，且 48 小时后帖子从 Thunder 实时内存池退役，完成一次完整的爆款生命周期。",
+                tip: "破圈关键：爆款爆发期间不要在几分钟内连续密集发新帖（会触发同作者多样性衰减），最好间隔数小时或在原爆款下挂接优质补充Thread。",
+                camPos: { x: 0, y: 32, z: 54 },
+                lookAt: { x: 0, y: 0, z: 0 }
+            }
+        ];
+
+        // Global State
+        let currentStage = 0;
+        let autoPlayTimer = null;
+        let simState = {
+            score: 84.6,
+            impressions: 1240580,
+            velocity: 2.4,
+            isPenalized: false
+        };
+
+        // ============================================================================
+        // 2. THREE.JS 3D INTERACTIVE VISUALIZATION ENGINE
+        // ============================================================================
+        let scene, camera, renderer;
+        let postCoreMesh, postWireframe, groxScannerRing;
+        let thunderRingGroup, followerNodes = [];
+        let simClusterGroups = [];
+        let transformerGates = [];
+        let particleSystem, particlePositions, particleVelocities, particleColors;
+        const PARTICLE_COUNT = 1200;
+
+        // Camera Orbit State
+        let isDragging = false;
+        let prevMouse = { x: 0, y: 0 };
+        let spherical = { radius: 38, theta: 0.2, phi: 1.15 };
+        let targetSpherical = { radius: 38, theta: 0.2, phi: 1.15 };
+        let cameraLookAtTarget = new THREE.Vector3(0, 0, 0);
+
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x05070B, 0.012);
+
+            camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 300);
+            updateCameraFromSpherical();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0x00F0FF, 2.5, 80);
+            pointLight1.position.set(10, 20, 15);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0x8B5CF6, 2.2, 80);
+            pointLight2.position.set(-15, -10, -10);
+            scene.add(pointLight2);
+
+            // 1. Central Post Core (Octahedron + Glowing Wireframe)
+            const coreGeo = new THREE.OctahedronGeometry(2.4, 2);
+            const coreMat = new THREE.MeshStandardMaterial({
+                color: 0x00F0FF,
+                emissive: 0x0088AA,
+                emissiveIntensity: 0.7,
+                roughness: 0.2,
+                metalness: 0.8
+            });
+            postCoreMesh = new THREE.Mesh(coreGeo, coreMat);
+            scene.add(postCoreMesh);
+
+            const wireGeo = new THREE.IcosahedronGeometry(3.1, 1);
+            const wireMat = new THREE.MeshBasicMaterial({
+                color: 0x00F0FF,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.45
+            });
+            postWireframe = new THREE.Mesh(wireGeo, wireMat);
+            scene.add(postWireframe);
+
+            // 2. Grox Multimodal Laser Scanner Ring (Stage 01)
+            const scannerGeo = new THREE.RingGeometry(3.4, 4.8, 48);
+            const scannerMat = new THREE.MeshBasicMaterial({
+                color: 0x8B5CF6,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.65
+            });
+            groxScannerRing = new THREE.Mesh(scannerGeo, scannerMat);
+            groxScannerRing.rotation.x = Math.PI / 2;
+            scene.add(groxScannerRing);
+
+            // 3. Thunder In-Network Memory Ring & Follower Nodes (Stage 02 & 03)
+            thunderRingGroup = new THREE.Group();
+            const torusGeo = new THREE.TorusGeometry(10, 0.08, 16, 100);
+            const torusMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF, transparent: true, opacity: 0.4 });
+            const thunderTorus = new THREE.Mesh(torusGeo, torusMat);
+            thunderTorus.rotation.x = Math.PI / 2;
+            thunderRingGroup.add(thunderTorus);
+
+            const numFollowers = 18;
+            for (let i = 0; i < numFollowers; i++) {
+                const angle = (i / numFollowers) * Math.PI * 2;
+                const radius = 10;
+                const nodeGeo = new THREE.SphereGeometry(0.45, 16, 16);
+                const nodeMat = new THREE.MeshStandardMaterial({
+                    color: 0x00F0FF,
+                    emissive: 0x00F0FF,
+                    emissiveIntensity: 0.5
+                });
+                const node = new THREE.Mesh(nodeGeo, nodeMat);
+                node.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 2, Math.sin(angle) * radius);
+                
+                // Connection Line to Center
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, 0),
+                    node.position.clone()
+                ]);
+                const lineMat = new THREE.LineBasicMaterial({ color: 0x00F0FF, transparent: true, opacity: 0.25 });
+                const line = new THREE.Line(lineGeo, lineMat);
+                thunderRingGroup.add(line);
+                thunderRingGroup.add(node);
+                followerNodes.push({ mesh: node, line: line, angle: angle, baseY: node.position.y });
+            }
+            scene.add(thunderRingGroup);
+
+            // 4. SimClusters Out-of-Network Community Spheres (Stage 04 & 06)
+            const clusterCoords = [
+                { x: 18, y: 4, z: -8, color: 0xF59E0B, size: 3.2 },
+                { x: -19, y: -3, z: -10, color: 0x8B5CF6, size: 3.6 },
+                { x: 15, y: -5, z: 14, color: 0x10B981, size: 3.0 },
+                { x: -16, y: 6, z: 12, color: 0x00F0FF, size: 3.4 },
+                { x: 0, y: 11, z: -20, color: 0xF59E0B, size: 4.0 }
+            ];
+
+            clusterCoords.forEach((c, idx) => {
+                const group = new THREE.Group();
+                group.position.set(c.x, c.y, c.z);
+
+                const sphereGeo = new THREE.IcosahedronGeometry(c.size, 1);
+                const sphereMat = new THREE.MeshBasicMaterial({
+                    color: c.color,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.35
+                });
+                const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+                group.add(sphere);
+
+                // Inner core of community cluster
+                const innerGeo = new THREE.SphereGeometry(c.size * 0.35, 16, 16);
+                const innerMat = new THREE.MeshBasicMaterial({
+                    color: c.color,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const inner = new THREE.Mesh(innerGeo, innerMat);
+                group.add(inner);
+
+                // Bridge Line from Post Core to Cluster
+                const bridgeGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-c.x, -c.y, -c.z),
+                    new THREE.Vector3(0, 0, 0)
+                ]);
+                const bridgeMat = new THREE.LineBasicMaterial({ color: c.color, transparent: true, opacity: 0.2 });
+                const bridge = new THREE.Line(bridgeGeo, bridgeMat);
+                group.add(bridge);
+
+                scene.add(group);
+                simClusterGroups.push({ group, sphere, inner, bridge, baseColor: c.color });
+            });
+
+            // 5. Phoenix Transformer Attention Matrix Planes (Stage 05)
+            for (let i = 0; i < 3; i++) {
+                const planeGeo = new THREE.PlaneGeometry(14, 14, 8, 8);
+                const planeMat = new THREE.MeshBasicMaterial({
+                    color: 0x8B5CF6,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.0
+                });
+                const plane = new THREE.Mesh(planeGeo, planeMat);
+                plane.position.z = (i - 1) * 5;
+                scene.add(plane);
+                transformerGates.push(plane);
+            }
+
+            // 6. Dynamic Particle Stream (Candidate Posts & User Impressions)
+            const pGeo = new THREE.BufferGeometry();
+            particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+            particleVelocities = new Float32Array(PARTICLE_COUNT * 3);
+            particleColors = new Float32Array(PARTICLE_COUNT * 3);
+
+            const colorCyan = new THREE.Color(0x00F0FF);
+            const colorEmerald = new THREE.Color(0x10B981);
+            const colorAmber = new THREE.Color(0xF59E0B);
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                resetParticle(i);
+                const chosen = i % 3 === 0 ? colorCyan : (i % 3 === 1 ? colorEmerald : colorAmber);
+                particleColors[i * 3] = chosen.r;
+                particleColors[i * 3 + 1] = chosen.g;
+                particleColors[i * 3 + 2] = chosen.b;
+            }
+
+            pGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+            pGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+            const pMat = new THREE.PointsMaterial({
+                size: 0.32,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem = new THREE.Points(pGeo, pMat);
+            scene.add(particleSystem);
+
+            // Mouse & Touch Orbit Interaction
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                prevMouse = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - prevMouse.x;
+                const dy = e.clientY - prevMouse.y;
+                targetSpherical.theta -= dx * 0.007;
+                targetSpherical.phi = Math.max(0.25, Math.min(Math.PI - 0.25, targetSpherical.phi - dy * 0.007));
+                prevMouse = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                targetSpherical.radius = Math.max(14, Math.min(80, targetSpherical.radius + e.deltaY * 0.03));
+            }, { passive: false });
+
+            // Touch Support
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', () => { isDragging = false; });
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - prevMouse.x;
+                const dy = e.touches[0].clientY - prevMouse.y;
+                targetSpherical.theta -= dx * 0.007;
+                targetSpherical.phi = Math.max(0.25, Math.min(Math.PI - 0.25, targetSpherical.phi - dy * 0.007));
+                prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }, { passive: true });
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function resetParticle(i) {
+            const idx = i * 3;
+            const angle = Math.random() * Math.PI * 2;
+            const elevation = (Math.random() - 0.5) * Math.PI;
+            const speed = 0.06 + Math.random() * 0.14;
+
+            particlePositions[idx] = (Math.random() - 0.5) * 2;
+            particlePositions[idx + 1] = (Math.random() - 0.5) * 2;
+            particlePositions[idx + 2] = (Math.random() - 0.5) * 2;
+
+            particleVelocities[idx] = Math.cos(angle) * Math.cos(elevation) * speed;
+            particleVelocities[idx + 1] = Math.sin(elevation) * speed;
+            particleVelocities[idx + 2] = Math.sin(angle) * Math.cos(elevation) * speed;
+        }
+
+        function updateCameraFromSpherical() {
+            spherical.radius += (targetSpherical.radius - spherical.radius) * 0.08;
+            spherical.theta += (targetSpherical.theta - spherical.theta) * 0.08;
+            spherical.phi += (targetSpherical.phi - spherical.phi) * 0.08;
+
+            camera.position.x = spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+            camera.position.y = spherical.radius * Math.cos(spherical.phi);
+            camera.position.z = spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+            camera.lookAt(cameraLookAtTarget);
+        }
+
+        function setCameraView(preset) {
+            if (preset === 'default') {
+                targetSpherical = { radius: 38, theta: 0.35, phi: 1.15 };
+            } else if (preset === 'top') {
+                targetSpherical = { radius: 44, theta: 0.0, phi: 0.18 };
+            } else if (preset === 'closeup') {
+                targetSpherical = { radius: 16, theta: 0.6, phi: 1.3 };
+            }
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !renderer) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // Main 3D Animation Loop
+        let clock = new THREE.Clock();
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            const t = clock.getElapsedTime();
+
+            // Smooth auto-orbit when idle
+            if (!isDragging) {
+                targetSpherical.theta += 0.0018;
+            }
+            updateCameraFromSpherical();
+
+            // 1. Animate Central Post Core
+            const pulseScale = 1 + Math.sin(t * 3.5) * 0.08 * (simState.velocity * 0.5);
+            postCoreMesh.scale.set(pulseScale, pulseScale, pulseScale);
+            postCoreMesh.rotation.y = t * 0.6;
+            postWireframe.rotation.x = -t * 0.4;
+            postWireframe.rotation.y = t * 0.5;
+
+            // Core color reflects viral status vs penalty
+            if (simState.isPenalized) {
+                postCoreMesh.material.color.setHex(0xF43F5E);
+                postCoreMesh.material.emissive.setHex(0x881337);
+                postWireframe.material.color.setHex(0xF43F5E);
+            } else if (simState.score > 65) {
+                postCoreMesh.material.color.setHex(0x00F0FF);
+                postCoreMesh.material.emissive.setHex(0x0088AA);
+                postWireframe.material.color.setHex(0x10B981);
+            } else {
+                postCoreMesh.material.color.setHex(0x38BDF8);
+                postCoreMesh.material.emissive.setHex(0x0284C7);
+                postWireframe.material.color.setHex(0x38BDF8);
+            }
+
+            // 2. Stage-Specific Visual Emphasizer
+            // Grox Scanner Ring prominent in Stage 0
+            if (currentStage === 0) {
+                groxScannerRing.visible = true;
+                groxScannerRing.position.y = Math.sin(t * 3) * 3.0;
+                groxScannerRing.material.opacity = 0.75;
+            } else {
+                groxScannerRing.position.y = 0;
+                groxScannerRing.material.opacity = 0.15;
+            }
+
+            // Follower Nodes (Stage 1: Outward Cyan, Stage 2: Inward Emerald High-Weight Ignition)
+            followerNodes.forEach((f, idx) => {
+                f.mesh.position.y = f.baseY + Math.sin(t * 2 + idx) * 0.4;
+                if (currentStage === 2) {
+                    f.mesh.material.color.setHex(0x10B981);
+                    f.mesh.material.emissive.setHex(0x10B981);
+                    f.line.material.color.setHex(0x10B981);
+                    f.line.material.opacity = 0.65;
+                    const s = 1.2 + Math.sin(t * 6 + idx) * 0.3;
+                    f.mesh.scale.set(s, s, s);
+                } else {
+                    f.mesh.material.color.setHex(0x00F0FF);
+                    f.mesh.material.emissive.setHex(0x00F0FF);
+                    f.line.material.color.setHex(0x00F0FF);
+                    f.line.material.opacity = currentStage >= 1 ? 0.35 : 0.1;
+                    f.mesh.scale.set(1, 1, 1);
+                }
+            });
+
+            // SimClusters Out-of-Network Spheres (Stage 3 & 5)
+            const activeClusterRatio = Math.max(0, Math.min(1, (simState.score - 15) / 60));
+            simClusterGroups.forEach((c, idx) => {
+                c.sphere.rotation.y = t * 0.3 + idx;
+                c.sphere.rotation.x = t * 0.2;
+                const isClusterUnlocked = (currentStage >= 3) && (idx / simClusterGroups.length < activeClusterRatio || currentStage === 3);
+                
+                if (isClusterUnlocked && !simState.isPenalized) {
+                    c.sphere.material.opacity = 0.55;
+                    c.inner.material.opacity = 0.85;
+                    c.bridge.material.opacity = 0.5;
+                    const cs = 1 + Math.sin(t * 3 + idx) * 0.12;
+                    c.group.scale.set(cs, cs, cs);
+                } else {
+                    c.sphere.material.opacity = 0.08;
+                    c.inner.material.opacity = 0.12;
+                    c.bridge.material.opacity = 0.05;
+                    c.group.scale.set(0.8, 0.8, 0.8);
+                }
+            });
+
+            // Transformer Gates (Stage 4)
+            transformerGates.forEach((plane, idx) => {
+                if (currentStage === 4) {
+                    plane.material.opacity = 0.35 + Math.sin(t * 3 + idx) * 0.1;
+                    plane.rotation.z = Math.sin(t * 0.5 + idx) * 0.1;
+                } else {
+                    plane.material.opacity = 0.0;
+                }
+            });
+
+            // 3. Update Particle Stream
+            const maxRadius = simState.isPenalized ? 9 : (10 + Math.min(28, Math.max(0, simState.score * 0.32)));
+            const speedMultiplier = Math.max(0.3, simState.velocity);
+            const positions = particleSystem.geometry.attributes.position.array;
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const idx = i * 3;
+                
+                // Stage 2 reverses some particles inward to show High-Weight Engagement Feedback
+                const direction = (currentStage === 2 && i % 2 === 0) ? -1 : 1;
+
+                positions[idx] += particleVelocities[idx] * speedMultiplier * direction;
+                positions[idx + 1] += particleVelocities[idx + 1] * speedMultiplier * direction;
+                positions[idx + 2] += particleVelocities[idx + 2] * speedMultiplier * direction;
+
+                const distSq = positions[idx]*positions[idx] + positions[idx+1]*positions[idx+1] + positions[idx+2]*positions[idx+2];
+                
+                if (distSq > maxRadius * maxRadius || (direction < 0 && distSq < 1.5)) {
+                    if (direction < 0) {
+                        // Spawn at follower ring and travel inward
+                        const angle = Math.random() * Math.PI * 2;
+                        positions[idx] = Math.cos(angle) * 10;
+                        positions[idx + 1] = (Math.random() - 0.5) * 3;
+                        positions[idx + 2] = Math.sin(angle) * 10;
+                    } else {
+                        resetParticle(i);
+                    }
+                }
+            }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        // ============================================================================
+        // 3. INTERACTIVE STAGE CONTROLLER & SVG TABS
+        // ============================================================================
+        function selectStage(stageIndex) {
+            currentStage = stageIndex;
+            const s = STAGES[stageIndex];
+
+            // Update Top 3D HUD Text
+            document.getElementById('stage-badge-num').textContent = s.badge;
+            document.getElementById('stage-rust-path').textContent = s.path;
+            document.getElementById('stage-title').textContent = s.title;
+            document.getElementById('stage-subtitle').textContent = s.subtitle;
+
+            // Update Right Panel Technical Details
+            document.getElementById('detail-module').textContent = s.module;
+            document.getElementById('detail-struct').textContent = s.struct;
+            document.getElementById('detail-mechanism').textContent = s.mechanism;
+            document.getElementById('detail-tip').innerHTML = `<strong>破圈关键：</strong>${s.tip.replace('破圈关键：', '')}`;
+
+            // Highlight Stage Buttons
+            for (let i = 0; i < 6; i++) {
+                const btn = document.getElementById(`stage-btn-${i}`);
+                if (i === stageIndex) {
+                    btn.className = "stage-btn group text-left p-2 rounded-lg border transition-all bg-cyan-950/60 border-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.2)]";
+                } else {
+                    btn.className = "stage-btn group text-left p-2 rounded-lg border transition-all bg-slate-900/80 border-slate-800 hover:border-slate-700";
+                }
+            }
+
+            // Auto-switch SVG Tab if user selects Stage 4 (Phoenix Mask) or Stage 5 (Curve)
+            if (stageIndex === 4) {
+                switchSvgTab('attention');
+            } else if (stageIndex === 5) {
+                switchSvgTab('curve');
+            } else {
+                switchSvgTab('pipeline');
+            }
+
+            // Smoothly adjust camera spherical radius/angle for stage
+            const dx = s.camPos.x;
+            const dy = s.camPos.y;
+            const dz = s.camPos.z;
+            targetSpherical.radius = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            targetSpherical.theta = Math.atan2(dx, dz);
+            targetSpherical.phi = Math.acos(dy / targetSpherical.radius);
+        }
+
+        function nextStage() {
+            selectStage((currentStage + 1) % STAGES.length);
+        }
+
+        function prevStage() {
+            selectStage((currentStage - 1 + STAGES.length) % STAGES.length);
+        }
+
+        function toggleAutoPlay() {
+            const btn = document.getElementById('autoplay-btn');
+            const icon = document.getElementById('autoplay-icon');
+            const text = document.getElementById('autoplay-text');
+
+            if (autoPlayTimer) {
+                clearInterval(autoPlayTimer);
+                autoPlayTimer = null;
+                icon.className = "fa-solid fa-play text-[10px]";
+                text.textContent = "自动巡航推演";
+                btn.classList.remove('bg-emerald-500/20', 'border-emerald-400', 'text-emerald-300');
+            } else {
+                icon.className = "fa-solid fa-pause text-[10px]";
+                text.textContent = "巡航中 (4.5s/阶)";
+                btn.classList.add('bg-emerald-500/20', 'border-emerald-400', 'text-emerald-300');
+                autoPlayTimer = setInterval(() => {
+                    nextStage();
+                }, 4500);
+            }
+        }
+
+        function switchSvgTab(tabName) {
+            const tabs = ['pipeline', 'attention', 'curve'];
+            tabs.forEach(t => {
+                const panel = document.getElementById(`svg-panel-${t}`);
+                const btn = document.getElementById(`svg-tab-${t}`);
+                if (t === tabName) {
+                    panel.classList.remove('hidden');
+                    btn.className = "px-3 py-1 rounded-md font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white transition";
+                }
+            });
+        }
+
+        // ============================================================================
+        // 4. WEIGHTED SCORER SANDBOX & REAL-TIME SIMULATION
+        // ============================================================================
+        function updateSimulation() {
+            const replyProb = parseFloat(document.getElementById('slider-reply').value);
+            const bookmarkProb = parseFloat(document.getElementById('slider-bookmark').value);
+            const dwellProb = parseFloat(document.getElementById('slider-dwell').value);
+            const likeProb = parseFloat(document.getElementById('slider-like').value);
+            const negProb = parseFloat(document.getElementById('slider-negative').value);
+            const hasExtLink = document.getElementById('toggle-link').checked;
+            const hasRapidDecay = document.getElementById('toggle-decay').checked;
+
+            // Update UI Percentage Labels
+            document.getElementById('val-reply').textContent = replyProb;
+            document.getElementById('val-bookmark').textContent = bookmarkProb;
+            document.getElementById('val-dwell').textContent = dwellProb;
+            document.getElementById('val-like').textContent = likeProb;
+            document.getElementById('val-negative').textContent = negProb;
+
+            // Calculate Weighted Components (Normalized to readable 0-100+ scale reflecting x-algorithm ratios)
+            const cReply = (replyProb / 100) * 58.0;       // Author-engaged reply chain carries massive weight
+            const cBookmark = (bookmarkProb / 100) * 24.0; // Bookmarks & Reposts
+            const cDwell = (dwellProb / 100) * 18.0;       // Dwell time & video completion
+            const cLike = (likeProb / 100) * 5.0;          // Shallow likes carry minimal weight
+
+            const posTotal = Math.max(0.1, cReply + cBookmark + cDwell + cLike);
+
+            // Penalties
+            const negPenalty = (negProb / 40) * 75.0;
+            const linkPenalty = hasExtLink ? 28.0 : 0.0;
+            
+            let rawScore = posTotal - negPenalty - linkPenalty;
+            if (hasRapidDecay) {
+                rawScore *= 0.52; // Author Diversity Decay multiplier
+            }
+
+            const finalScore = Math.max(-30, Math.min(105, rawScore));
+            simState.score = finalScore;
+            simState.isPenalized = (finalScore < 18 || negProb >= 18 || hasExtLink);
+
+            // Calculate Simulated Impressions & Velocity
+            let impressions = 650;
+            if (finalScore > 80) {
+                impressions = Math.floor(800000 + (finalScore - 80) * 95000);
+            } else if (finalScore > 55) {
+                impressions = Math.floor(65000 + (finalScore - 55) * 28000);
+            } else if (finalScore > 30) {
+                impressions = Math.floor(4500 + (finalScore - 30) * 2400);
+            } else if (finalScore > 10) {
+                impressions = Math.floor(800 + (finalScore - 10) * 180);
+            } else {
+                impressions = Math.max(120, Math.floor(350 + finalScore * 8));
+            }
+            simState.impressions = impressions;
+            simState.velocity = Math.max(0.3, (finalScore + 35) / 45);
+
+            // Update Top HUD & Formula Bar
+            document.getElementById('hud-impressions').textContent = impressions.toLocaleString();
+            document.getElementById('hud-score').textContent = finalScore.toFixed(1);
+            document.getElementById('formula-live-result').textContent = `= ${finalScore >= 0 ? '+' : ''}${finalScore.toFixed(1)}`;
+            document.getElementById('svg-live-score').textContent = `Score: ${finalScore.toFixed(1)}`;
+            document.getElementById('svg-live-reach').textContent = `触达: ${impressions >= 1000000 ? (impressions/1000000).toFixed(2)+'M+' : impressions.toLocaleString()} 曝光`;
+
+            // Viral Tier Badge
+            const tierBadge = document.getElementById('hud-viral-tier');
+            const diagnosis = document.getElementById('score-diagnosis');
+            const groxStatus = document.getElementById('svg-grox-status');
+
+            if (finalScore >= 70) {
+                tierBadge.textContent = "现象级爆款";
+                tierBadge.className = "text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                diagnosis.textContent = "高权重评论链与收藏驱动破圈";
+                diagnosis.className = "text-emerald-400";
+            } else if (finalScore >= 40) {
+                tierBadge.textContent = "中度破圈推荐";
+                tierBadge.className = "text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+                diagnosis.textContent = "进入双塔召回，但缺乏爆发级评论链";
+                diagnosis.className = "text-cyan-400";
+            } else if (finalScore >= 15) {
+                tierBadge.textContent = "仅关注圈流转";
+                tierBadge.className = "text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                diagnosis.textContent = "未达全网破圈阈值，停留于粉丝池";
+                diagnosis.className = "text-amber-400";
+            } else {
+                tierBadge.textContent = "算法降权阻断";
+                tierBadge.className = "text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                diagnosis.textContent = hasExtLink ? "主帖外链触发降权惩罚" : "负反馈概率过高触发熔断";
+                diagnosis.className = "text-rose-400";
+            }
+
+            if (hasExtLink || negProb >= 18) {
+                groxStatus.textContent = "⚠ 触发外链/引战降权偏移";
+                groxStatus.setAttribute('fill', '#F43F5E');
+            } else {
+                groxStatus.textContent = "✓ 安全与质量校验通过";
+                groxStatus.setAttribute('fill', '#10B981');
+            }
+
+            // Update Contribution Bar Widths
+            document.getElementById('bar-reply').style.width = `${(cReply / posTotal * 100).toFixed(1)}%`;
+            document.getElementById('bar-bookmark').style.width = `${(cBookmark / posTotal * 100).toFixed(1)}%`;
+            document.getElementById('bar-dwell').style.width = `${(cDwell / posTotal * 100).toFixed(1)}%`;
+            document.getElementById('bar-like').style.width = `${(cLike / posTotal * 100).toFixed(1)}%`;
+
+            // Update 3D Telemetry Text
+            const unlockedClusters = simState.isPenalized ? 0 : Math.min(5, Math.max(1, Math.round((finalScore - 10) / 16)));
+            document.getElementById('telemetry-velocity').textContent = `${simState.velocity.toFixed(1)}x`;
+            document.getElementById('telemetry-clusters').textContent = `${unlockedClusters} / 5`;
+
+            // Update SVG Growth Curve dynamically
+            const peakY = Math.max(25, Math.min(165, 170 - (finalScore * 1.45)));
+            const midY = Math.max(70, Math.min(165, 170 - (finalScore * 0.75)));
+            const endY = Math.min(172, peakY + (hasRapidDecay ? 45 : 15));
+            const newPath = `M 45 168 Q 140 160, 195 ${midY} T 360 ${peakY} Q 460 ${peakY - 5}, 570 ${endY}`;
+            const newArea = `${newPath} L 570 175 L 45 175 Z`;
+
+            document.getElementById('svg-growth-curve').setAttribute('d', newPath);
+            document.getElementById('svg-growth-area').setAttribute('d', newArea);
+            document.getElementById('curve-dot-1').setAttribute('cy', midY);
+            document.getElementById('curve-dot-2').setAttribute('cy', peakY);
+        }
+
+        function applyPreset(presetName) {
+            const buttons = ['viral', 'normal', 'ragebait'];
+            buttons.forEach(b => {
+                const el = document.getElementById(`preset-${b}`);
+                if (b === presetName) {
+                    el.className = "px-2.5 py-1 rounded-md font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition";
+                } else {
+                    el.className = "px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition";
+                }
+            });
+
+            if (presetName === 'viral') {
+                document.getElementById('slider-reply').value = 82;
+                document.getElementById('slider-bookmark').value = 70;
+                document.getElementById('slider-dwell').value = 85;
+                document.getElementById('slider-like').value = 55;
+                document.getElementById('slider-negative').value = 3;
+                document.getElementById('toggle-link').checked = false;
+                document.getElementById('toggle-decay').checked = false;
+            } else if (presetName === 'normal') {
+                document.getElementById('slider-reply').value = 18;
+                document.getElementById('slider-bookmark').value = 15;
+                document.getElementById('slider-dwell').value = 35;
+                document.getElementById('slider-like').value = 60;
+                document.getElementById('slider-negative').value = 2;
+                document.getElementById('toggle-link').checked = false;
+                document.getElementById('toggle-decay').checked = false;
+            } else if (presetName === 'ragebait') {
+                document.getElementById('slider-reply').value = 45;
+                document.getElementById('slider-bookmark').value = 10;
+                document.getElementById('slider-dwell').value = 25;
+                document.getElementById('slider-like').value = 40;
+                document.getElementById('slider-negative').value = 28;
+                document.getElementById('toggle-link').checked = true;
+                document.getElementById('toggle-decay').checked = true;
+            }
+            updateSimulation();
+        }
+
+        // Start Everything on Window Load
+        window.onload = function () {
+            initThreeJS();
+            selectStage(0);
+            updateSimulation();
+            animate3D();
+        };
+    </script>
+</body>
+</html>
